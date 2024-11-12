@@ -70,9 +70,8 @@ export function LowerNavbar() {
     },
   ];
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 ">
+    <div className="fixed bottom-1 left-1/2 -translate-x-1/2 z-50 ">
       <FloatingDock 
-        mobileClassName="translate-y-20" // only for demo, remove for production
         items={links}
       />
     </div>

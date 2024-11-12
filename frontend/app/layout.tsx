@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 
 import { UpperNavbar } from "@/components/UpperNavbar";
 import { LowerNavbar } from "@/components/LowerNavbar";
+import { HoverBorderGradientDemo } from "@/components/LoginButton";
 
 
 
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black ` }>
         <UpperNavbar />
+        <HoverBorderGradientDemo />
         {children}
         <LowerNavbar />
       </body>
