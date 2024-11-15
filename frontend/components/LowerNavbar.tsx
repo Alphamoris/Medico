@@ -8,63 +8,66 @@ import {
   IconNewSection,
   IconTerminal2,
 } from "@tabler/icons-react";
+import { FaUserDoctor } from "react-icons/fa6";
+import { GiArtificialHive, GiArtificialIntelligence, GiMedicines } from "react-icons/gi";
 import Image from "next/image";
+import { CalendarDaysIcon, CircleUserRoundIcon, HistoryIcon, NewspaperIcon, PillIcon, SyringeIcon } from "lucide-react";
 
 export function LowerNavbar() {
+  
   const links = [
     {
-      title: "Home",
+      title: "Appointments",
       icon: (
-        <IconHome className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <CalendarDaysIcon color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
       href: "#",
     },
 
     {
-      title: "Products",
+      title: "Feed",
       icon: (
-        <IconTerminal2 className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <NewspaperIcon color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
       href: "#",
     },
     {
-      title: "Components",
+      title: "Find Doctors",
       icon: (
-        <IconNewSection className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <FaUserDoctor color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
       href: "#",
     },
     {
-      title: "Aceternity UI",
+      title: "Hi! I'm Dive AI",
       icon: (
-        <Image
-          src="https://assets.aceternity.com/logo-dark.png"
-          width={20}
-          height={20}
-          alt="Aceternity Logo"
-        />
+        <div className="relative inline-block">
+        <GiArtificialHive size={40} className="text-blue-500 rounded-full border border-black " />
+        
+      </div>
       ),
-      href: "#",
+      href: "/",
     },
     {
-      title: "Changelog",
+      title: "History",
       icon: (
-        <IconExchange className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <HistoryIcon color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
+      
       href: "#",
     },
 
     {
-      title: "Twitter",
+      title: "Buy Medicine",
       icon: (
-        <IconBrandX className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <GiMedicines color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
       href: "#",
     },
     {
-      title: "GitHub",
+      title: "Profile",
       icon: (
-        <IconBrandGithub className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <CircleUserRoundIcon color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
       href: "#",
     },

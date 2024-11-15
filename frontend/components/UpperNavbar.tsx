@@ -3,6 +3,9 @@ import React, { useState } from "react";
 import { HoveredLink, Menu, MenuItem, ProductItem } from "@/components/ui/navbar-menu";
 import { cn } from "@/lib/utils";
 import { HoverBorderGradientDemo } from "./LoginButton";
+import { UsbIcon } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 export function UpperNavbar() {
   return (
@@ -16,9 +19,15 @@ function Navbar({ className }: { className?: string }) {
   const [active, setActive] = useState<string | null>(null);
   return (
     <div
-      className={cn("fixed top-0 w-96 inset-x-0 max-w-2xl mx-auto z-50", className)}
+      className={cn("fixed top-0 w-85 md:w-96 inset-x-0 max-w-2xl mx-auto z-50", className)}
     >
       <Menu setActive={setActive}>
+      <Link href={"/"} className="flex items-center md:me-2 me-5">
+      <Image className="me-1" src={"/logo.ico"} height={30} width={30} alt="logo"></Image>
+      <span className="text-1md md:text-3md font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-teal-400  to-blue-600 hover:underline hover:scale-110 transition-all duration-500 ease-out transform">
+              Medico
+            </span>
+      </Link>
         <MenuItem setActive={setActive} active={active} item="Services">
           <div className="flex flex-col space-y-4 text-sm">
             <HoveredLink href="/web-dev">Web Development</HoveredLink>
@@ -28,7 +37,7 @@ function Navbar({ className }: { className?: string }) {
           </div>
         </MenuItem>
         <MenuItem setActive={setActive} active={active} item="Products">
-          <div className="  text-sm grid grid-cols-2 gap-10 p-4">
+          <div className="  text-sm md:me-0 md:p-4 md:grid md:grid-cols-2 gap-10 me-24">
             <ProductItem
               title="Algochurn"
               href="https://algochurn.com"

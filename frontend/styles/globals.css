@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+
+body {
+  font-family: "Jacques Francois Shadow", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -77,3 +84,16 @@
 .no-visible-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+

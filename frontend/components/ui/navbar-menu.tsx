@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { HoverBorderGradientDemo } from "../LoginButton";
+import { UsbIcon } from "lucide-react";
 
 const transition = {
   type: "spring",
@@ -24,14 +25,12 @@ export const MenuItem = ({
   item: string;
   children?: React.ReactNode;
 }) => {
-  const [count,setCount] = useState<boolean>(true);
-  const stateChange = () => (setCount(false))
   return (
     <>
       <div onMouseEnter={() => {setActive(item)}} className="relative ">
         <motion.p
           transition={{ duration: 0.3 }}
-          className="cursor-pointer text-black hover:opacity-[0.9] dark:text-white"
+          className="cursor-pointer text-teal-700 hover:opacity-[0.9] hover:underline dark:text-white"
         >
           {item}
         </motion.p>
@@ -42,7 +41,7 @@ export const MenuItem = ({
             transition={transition}
           >
             {active === item && (
-              <div className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 pt-4">
+              <div className="absolute top-[calc(100%_+_0.1rem)] left-1/2 transform -translate-x-1/2 pt-4">
                 <motion.div
                   transition={transition}
                   layoutId="active" // layoutId ensures smooth animation
@@ -74,7 +73,7 @@ export const Menu = ({
   return (
     <nav
       onMouseLeave={() => setActive(null)} // resets the state
-      className="relative rounded-full border border-transparent dark:bg-black dark:border-white/[0.2] shadow-input flex justify-center space-x-4 px-8 py-2 bg-slate-400 "
+      className="relative rounded-full border border-transparent dark:bg-black dark:border-white/[0.2] shadow-input flex justify-center space-x-4 px-8 py-2 bg-white "
     >
       {children}
     </nav>
