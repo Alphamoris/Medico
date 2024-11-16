@@ -11,12 +11,12 @@ export function Landing() {
        Personalized Solutions, All Designed to Empower You on Your Journey to Better Health and a Brighter Future.`;
 
   return (
-    <div className="w-[calc(100%-4rem)] mx-auto rounded-md  h-[30rem] overflow-hidden ">
+    <div className="w-full mx-auto rounded-md md:h-[22rem] h-[30rem] overflow-hidden ">
       <Vortex
         backgroundColor="black"
-        className="flex items-center flex-col justify-center px-2 md:px-10 py-4 w-full h-full"
+        className="flex items-center flex-col justify-center px-3 md:px-10 py-2 w-full h-full"
       >
-        <h2 className=" text-white text-2xl mt-40 md:text-6xl sm:mt-0 font-bold text-center">
+        <h2 className=" text-white text-2xl mt-10 md:text-6xl sm:mt-0 font-bold text-center">
           <Link className="flex items-center" href="/">
             <Image
               alt="logo"

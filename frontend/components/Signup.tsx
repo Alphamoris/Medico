@@ -1,123 +1,170 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import {
   IconBrandGithub,
   IconBrandGoogle,
   IconBrandOnlyfans,
+  IconSparkles
 } from "@tabler/icons-react";
 
-export function Signup() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Form submitted");
-  };
-  return (
-    <div className="mt-10 max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-slate-300">
-      <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
-        Welcome to Aceternity
-      </h2>
-      <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300">
-        Login to aceternity if you can because we don&apos;t have a login flow
-        yet
-      </p>
-
-      <form className="my-8" onSubmit={handleSubmit}>
-        <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
-          <LabelInputContainer>
-            <Label htmlFor="firstname">First name</Label>
-            <Input id="firstname" placeholder="Tyler" type="text" />
-          </LabelInputContainer>
-          <LabelInputContainer>
-            <Label htmlFor="lastname">Last name</Label>
-            <Input id="lastname" placeholder="Durden" type="text" />
-          </LabelInputContainer>
-        </div>
-        <LabelInputContainer className="mb-4">
-          <Label htmlFor="email">Email Address</Label>
-          <Input id="email" placeholder="projectmayhem@fc.com" type="email" />
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-4">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" placeholder="••••••••" type="password" />
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-8">
-          <Label htmlFor="twitterpassword">Your twitter password</Label>
-          <Input
-            id="twitterpassword"
-            placeholder="••••••••"
-            type="twitterpassword"
-          />
-        </LabelInputContainer>
-
-        <button
-          className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
-          type="submit"
-        >
-          Sign up &rarr;
-          <BottomGradient />
-        </button>
-
-        <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
-
-        <div className="flex flex-col space-y-4">
-          <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-          >
-            <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-              GitHub
-            </span>
-            <BottomGradient />
-          </button>
-          <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-          >
-            <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-              Google
-            </span>
-            <BottomGradient />
-          </button>
-          <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-          >
-            <IconBrandOnlyfans className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-              OnlyFans
-            </span>
-            <BottomGradient />
-          </button>
-        </div>
-      </form>
-    </div>
-  );
+interface SignupFormData {
+  firstname: string;
+  lastname: string;
+  email: string;
+  password: string;
 }
 
-const BottomGradient = () => {
-  return (
-    <>
-      <span className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
-      <span className="group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
-    </>
-  );
-};
+export const Signup: React.FC = () => {
+  const [formData, setFormData] = useState<SignupFormData>({
+    firstname: "",
+    lastname: "",
+    email: "",
+    password: ""
+  });
 
-const LabelInputContainer = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("Form submitted", formData);
+    // Here you can add your form submission logic
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
   return (
-    <div className={cn("flex flex-col space-y-2 w-full", className)}>
-      {children}
-    </div>
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-gradient-to-br from-teal-50 to-teal-100 flex items-center justify-center p-4"
+    >
+      <div className="w-full max-w-md bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="p-6 bg-teal-600">
+          <h2 className="text-3xl md:text-4xl font-bold text-white flex items-center justify-center gap-2">
+            <IconSparkles className="text-yellow-300" />
+            Create Your Account
+            <IconSparkles className="text-yellow-300" />
+          </h2>
+        </div>
+
+        <form 
+          onSubmit={handleSubmit} 
+          className="p-6 space-y-4"
+        >
+          {/* Name Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <motion.div 
+              whileFocus={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <Label htmlFor="firstname" className="text-teal-700">First Name</Label>
+              <Input 
+                id="firstname"
+                type="text"
+                value={formData.firstname}
+                onChange={handleChange}
+                placeholder="Tyler"
+                className="mt-1 focus:ring-2 focus:ring-teal-500 transition-all duration-300 rounded-lg shadow-sm"
+                required
+              />
+            </motion.div>
+
+            <motion.div 
+              whileFocus={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <Label htmlFor="lastname" className="text-teal-700">Last Name</Label>
+              <Input 
+                id="lastname"
+                type="text"
+                value={formData.lastname}
+                onChange={handleChange}
+                placeholder="Durden"
+                className="mt-1 focus:ring-2 focus:ring-teal-500 transition-all duration-300 rounded-lg shadow-sm"
+                required
+              />
+            </motion.div>
+          </div>
+
+          {/* Email Field */}
+          <motion.div 
+            whileFocus={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <Label htmlFor="email" className="text-teal-700">Email Address</Label>
+            <Input 
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="projectmayhem@fc.com"
+              className="mt-1 focus:ring-2 focus:ring-teal-500 transition-all duration-300 rounded-lg shadow-sm"
+              required
+            />
+          </motion.div>
+
+          {/* Password Field */}
+          <motion.div 
+            whileFocus={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <Label htmlFor="password" className="text-teal-700">Password</Label>
+            <Input 
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              className="mt-1 focus:ring-2 focus:ring-teal-500 transition-all duration-300 rounded-lg shadow-sm"
+              required
+            />
+          </motion.div>
+
+          {/* Submit Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="submit"
+            className="w-full bg-teal-600 text-white py-3 rounded-lg hover:bg-teal-700 transition-all duration-300 shadow-lg"
+          >
+            Create Account
+          </motion.button>
+
+          {/* Social Divider */}
+          <div className="flex items-center my-4">
+            <div className="flex-grow border-t border-teal-300"></div>
+            <span className="px-4 text-teal-600">Or continue with</span>
+            <div className="flex-grow border-t border-teal-300"></div>
+          </div>
+
+          {/* Social Login Buttons */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { Icon: IconBrandGithub, name: "GitHub", color: "bg-gray-800" },
+              { Icon: IconBrandGoogle, name: "Google", color: "bg-red-500" },
+              { Icon: IconBrandOnlyfans, name: "OnlyFans", color: "bg-pink-500" }
+            ].map(({ Icon, name, color }) => (
+              <motion.button
+                key={name}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className={`flex items-center justify-center py-2 ${color} text-white rounded-lg hover:opacity-90 transition-all shadow-md`}
+              >
+                <Icon className="mr-2" />
+                {name}
+              </motion.button>
+            ))}
+          </div>
+        </form>
+      </div>
+    </motion.div>
   );
 };

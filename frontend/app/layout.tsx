@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+"use client"
 import localFont from "next/font/local";
 import "@/styles/globals.css";
 
@@ -6,28 +6,30 @@ import "@/styles/globals.css";
 import { UpperNavbar } from "@/components/UpperNavbar";
 import { LowerNavbar } from "@/components/LowerNavbar";
 import { HoverBorderGradientDemo } from "@/components/LoginButton";
-import Link from "next/link";
-import Image from "next/image";
+import { usePathname } from "next/navigation";
+import Dive from "@/components/Dive";
+import EmergencyButton from "@/components/Ambulance";
 
 
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
 
+  export default function RootLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+    // Define routes to exclude from layout
+    const excludedRoutes = ['/authenticate/login', '/authenticate/signup', '/404'];
+
+    // Check if current route should be excluded
+    const isExcluded = excludedRoutes.includes(pathname);
+
+    // Conditional rendering based on route
+    if (isExcluded) {
+        return (
+            <html lang="en">
+                <body>{children}</body>
+            </html>
+        );
+    }
   return (
     <html lang="en">
       <head>
@@ -35,10 +37,12 @@ export default function RootLayout({
         <link rel="icon" href="/logo.ico"></link>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black `}>
+        className={`antialiased bg-black `}>
         <UpperNavbar />
         <HoverBorderGradientDemo />
         {children}
+        <Dive />
+        <EmergencyButton />
         <LowerNavbar />
       </body>
     </html>
