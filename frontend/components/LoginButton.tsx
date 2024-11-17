@@ -4,7 +4,7 @@ import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { LogInIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export function HoverBorderGradientDemo() {
+export function LoginButton() {
     const router = useRouter()
   return (
     <div className="fixed top-14 right-3 z-50 sm:top-2">

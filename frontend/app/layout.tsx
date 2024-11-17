@@ -5,7 +5,7 @@ import "@/styles/globals.css";
 
 import { UpperNavbar } from "@/components/UpperNavbar";
 import { LowerNavbar } from "@/components/LowerNavbar";
-import { HoverBorderGradientDemo } from "@/components/LoginButton";
+import { LoginButton } from "@/components/LoginButton";
 import { usePathname } from "next/navigation";
 import Dive from "@/components/Dive";
 import EmergencyButton from "@/components/Ambulance";
@@ -38,11 +38,8 @@ import EmergencyButton from "@/components/Ambulance";
       </head>
       <body
         className={`antialiased bg-black `}>
-        <UpperNavbar />
-        <HoverBorderGradientDemo />
+        <LoginButton />
         {children}
-        <Dive />
-        <EmergencyButton />
         <LowerNavbar />
       </body>
     </html>

@@ -18,7 +18,7 @@ import {
   X
 } from 'lucide-react';
 
-const DoctorShowcase = () => {
+const FindDoctor = () => {
   const [selectedSpeciality, setSelectedSpeciality] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -414,4 +414,4 @@ const DoctorShowcase = () => {
   );
 };
 
-export default DoctorShowcase;
+export default FindDoctor;

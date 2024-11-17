@@ -21,7 +21,7 @@ export function LowerNavbar() {
       icon: (
         <CalendarDaysIcon color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
-      href: "#",
+      href: "/appointment",
     },
 
     {
@@ -29,14 +29,14 @@ export function LowerNavbar() {
       icon: (
         <NewspaperIcon color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
-      href: "#",
+      href: "/",
     },
     {
       title: "Find Doctors",
       icon: (
         <FaUserDoctor color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
-      href: "#",
+      href: "/appointment/finddoctor",
     },
     {
       title: "Hi! I'm Dive AI",
@@ -62,7 +62,7 @@ export function LowerNavbar() {
       icon: (
         <GiMedicines color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
-      href: "#",
+      href: "/buy/medicine",
     },
     {
       title: "Profile",
