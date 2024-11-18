@@ -108,7 +108,7 @@ const medicines: Record<string, Medicine[]> = {
 };
 
 const categories: Category[] = [
-  { id: 'general', name: 'General Medicines', icon: <Package className="h-5 w-5" /> },
+  { id: 'general', name: 'General', icon: <Package className=" h-5 w-5 " /> },
   { id: 'cardiology', name: 'Cardiology', icon: <Heart className="h-5 w-5" /> },
   { id: 'orthopedic', name: 'Orthopedic', icon: <Tag className="h-5 w-5" /> },
 ];
@@ -190,6 +190,7 @@ const BuyMedicine: React.FC = () => {
     };
   }, [cart]);
 
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
@@ -307,7 +308,7 @@ const BuyMedicine: React.FC = () => {
                   >
                     <div className="flex items-center gap-2">
                       {category.icon}
-                      <span className="hidden sm:inline">{category.name}</span>
+                      <span className="text-xs sm:text-sm inline">{category.name}</span>
                     </div>
                   </TabsTrigger>
                 ))}

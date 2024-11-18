@@ -9,6 +9,7 @@ import { LoginButton } from "@/components/LoginButton";
 import { usePathname } from "next/navigation";
 import Dive from "@/components/Dive";
 import EmergencyButton from "@/components/Ambulance";
+import Footer from "@/components/Footer";
 
 
 
@@ -41,6 +42,7 @@ import EmergencyButton from "@/components/Ambulance";
         <LoginButton />
         {children}
         <LowerNavbar />
+        {/* <Footer /> */}
       </body>
     </html>
   );

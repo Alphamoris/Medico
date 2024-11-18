@@ -11,13 +11,14 @@ import MedicineStore from "@/components/BuyMedicines";
 import Dive from "@/components/Dive";
 import EmergencyButton from "@/components/Ambulance";
 import { UpperNavbar } from "@/components/UpperNavbar";
+import Health from "@/components/HealthcareLanding";
 
 
 export default function Home() {
   return (
     <>
      <UpperNavbar />
-      <Landing />
+      <Health />
       <Dive />
       <EmergencyButton />
       {/* <Dashboard /> */}

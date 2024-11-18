@@ -1,17 +1,8 @@
 import React from "react";
 import { FloatingDock } from "@/components/ui/floating-dock";
-import {
-  IconBrandGithub,
-  IconBrandX,
-  IconExchange,
-  IconHome,
-  IconNewSection,
-  IconTerminal2,
-} from "@tabler/icons-react";
 import { FaUserDoctor } from "react-icons/fa6";
-import { GiArtificialHive, GiArtificialIntelligence, GiMedicines } from "react-icons/gi";
-import Image from "next/image";
-import { CalendarDaysIcon, CircleUserRoundIcon, HistoryIcon, NewspaperIcon, PillIcon, SyringeIcon } from "lucide-react";
+import { GiArtificialHive, GiMedicines } from "react-icons/gi";
+import { CalendarDaysIcon, CircleUserRoundIcon, HistoryIcon, NewspaperIcon } from "lucide-react";
 
 export function LowerNavbar() {
   
@@ -29,7 +20,7 @@ export function LowerNavbar() {
       icon: (
         <NewspaperIcon color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
-      href: "/",
+      href: "/feed",
     },
     {
       title: "Find Doctors",
