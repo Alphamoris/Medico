@@ -1,0 +1,3 @@
+backend\virenv
+backend\.env
+backend\alembic.ini

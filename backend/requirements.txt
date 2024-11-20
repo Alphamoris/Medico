@@ -1,0 +1,7 @@
+sqlalchemy
+pydantic_settings
+jwt
+passlib
+bcrypt
+alembic
+PyJWT
