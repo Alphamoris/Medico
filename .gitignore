@@ -1,3 +1,3 @@
-backend\virenv
-backend\.env
-backend\alembic.ini
+backend/virenv/
+backend/.env
+backend/alembic.ini
