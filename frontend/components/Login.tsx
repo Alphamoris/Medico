@@ -3,8 +3,14 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { LogIn, Lock, Mail, Eye, EyeOff, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { login } from "@/apilib/ApiAuthenticate";
+import { LoginFormData } from "@/interface";
 
 export default function OptimizedLogin() {
+    // const [loginData , setLoginData ] = useState<LoginFormData>({
+    //     email : "" ,
+    //     password : ""
+    // })
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isPasswordVisible, setPasswordVisible] = useState(false);
@@ -15,8 +21,8 @@ export default function OptimizedLogin() {
         setIsLoading(true);
         
         try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            console.log("Login Successful");
+            const response = await login({email,password});
+            console.log(`Login Successful :  `,response);
         } catch (error) {
             console.error("Login Failed");
         } finally {

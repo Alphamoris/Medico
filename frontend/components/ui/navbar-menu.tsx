@@ -3,8 +3,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { HoverBorderGradientDemo } from "../LoginButton";
-import { UsbIcon } from "lucide-react";
+
 
 const transition = {
   type: "spring",

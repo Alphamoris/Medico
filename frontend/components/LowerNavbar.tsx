@@ -3,6 +3,8 @@ import { FloatingDock } from "@/components/ui/floating-dock";
 import { FaUserDoctor } from "react-icons/fa6";
 import { GiArtificialHive, GiMedicines } from "react-icons/gi";
 import { CalendarDaysIcon, CircleUserRoundIcon, HistoryIcon, NewspaperIcon } from "lucide-react";
+import { BiSolidHome } from "react-icons/bi";
+
 
 export function LowerNavbar() {
   
@@ -29,14 +31,13 @@ export function LowerNavbar() {
       ),
       href: "/appointment/finddoctor",
     },
+    // 
     {
-      title: "Hi! I'm Dive AI",
+      title: "Home",
       icon: (
-        <div className="relative inline-block">
-        <GiArtificialHive size={40} className="text-blue-500 rounded-full border border-black " />
-        
-      </div>
+        <BiSolidHome color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
+      
       href: "/",
     },
     {
@@ -45,7 +46,7 @@ export function LowerNavbar() {
         <HistoryIcon color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
       
-      href: "#",
+      href: "/history",
     },
 
     {
@@ -60,7 +61,7 @@ export function LowerNavbar() {
       icon: (
         <CircleUserRoundIcon color="teal" className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
-      href: "#",
+      href: "/profile",
     },
   ];
   return (

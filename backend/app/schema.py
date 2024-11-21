@@ -5,8 +5,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class User(BaseModel):
-    id : int
-    username : EmailStr
+    u_id : int
+    firstname : str
+    lastname : str
+    email : EmailStr
     password : str
 
 

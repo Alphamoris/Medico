@@ -42,7 +42,7 @@ import Footer from "@/components/Footer";
         <LoginButton />
         {children}
         <LowerNavbar />
-        {/* <Footer /> */}
+        <Footer />
       </body>
     </html>
   );

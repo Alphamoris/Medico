@@ -2,6 +2,9 @@ import React from 'react';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Heart, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from 'next/link';
+import Image from 'next/image';
+
 
 interface SocialLink {
   icon: React.ReactNode;
@@ -23,10 +26,10 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   const socialLinks: SocialLink[] = [
-    { icon: <Facebook className="h-5 w-5" />, href: "#", label: "Facebook" },
-    { icon: <Twitter className="h-5 w-5" />, href: "#", label: "Twitter" },
-    { icon: <Instagram className="h-5 w-5" />, href: "#", label: "Instagram" },
-    { icon: <Linkedin className="h-5 w-5" />, href: "#", label: "LinkedIn" }
+    { icon: <Facebook className="h-5 w-5" color='teal'/>, href: "#", label: "Facebook" },
+    { icon: <Twitter className="h-5 w-5" color='teal' />, href: "#", label: "Twitter" },
+    { icon: <Instagram className="h-5 w-5" color='teal' />, href: "#", label: "Instagram" },
+    { icon: <Linkedin className="h-5 w-5" color='teal' />, href: "#", label: "LinkedIn" }
   ];
 
   const quickLinks: QuickLink[] = [
@@ -46,19 +49,19 @@ const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="relative w-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pt-16 pb-8 overflow-x-hidden">
+    <footer className="relative w-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pt-8 pb-4 overflow-x-hidden">
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-blue-200 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute top-1/2 right-0 w-96 h-96 bg-purple-200 rounded-full filter blur-3xl opacity-20 translate-x-1/2 -translate-y-1/2" />
       
       <div className="container mx-auto px-4 relative">
         {/* Newsletter Section */}
-        <div className="w-full max-w-4xl mx-auto mb-16 bg-white rounded-2xl p-8 shadow-lg transform hover:-translate-y-1 transition-all duration-300">
+        <div className="w-full max-w-4xl mx-auto mb-10 bg-white rounded-2xl p-8 shadow-lg transform hover:-translate-y-1 transition-all duration-300">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Stay Updated with Health Tips</h2>
             <p className="text-gray-600">Subscribe to our newsletter for the latest healthcare insights</p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col justify-center sm:flex-row gap-4">
             <Input 
               type="email" 
               placeholder="Enter your email" 
@@ -74,14 +77,12 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Section */}
           <div className="space-y-6">
-            <div className="flex items-center space-x-2 transform hover:scale-105 transition-transform duration-300">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg">
-                <Heart className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                HealthCare
-              </span>
-            </div>
+          <Link href={"/"} className="flex items-center md:me-2 me-5">
+          <Image className="me-2" src={"/logo.ico"} height={80} width={80} alt="logo"></Image>
+          <span className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-teal-400  to-blue-600 hover:underline hover:scale-110 transition-all duration-500 ease-out transform">
+            Medico
+          </span>
+        </Link>
             <p className="text-gray-600 leading-relaxed">
               Providing compassionate care and innovative wellness solutions for a healthier, happier tomorrow.
             </p>

@@ -12,6 +12,8 @@ import Dive from "@/components/Dive";
 import EmergencyButton from "@/components/Ambulance";
 import { UpperNavbar } from "@/components/UpperNavbar";
 import Health from "@/components/HealthcareLanding";
+import Footer from "@/components/Footer";
+import NotAuthenticated from "@/components/NotAuthenticated";
 
 
 export default function Home() {
