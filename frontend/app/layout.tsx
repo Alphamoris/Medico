@@ -38,8 +38,8 @@ import Footer from "@/components/Footer";
         <link rel="icon" href="/logo.ico"></link>
       </head>
       <body
-        className={`antialiased bg-black `}>
-        <LoginButton />
+        className={`antialiased bg-indigo-100 `}>
+        
         {children}
         <LowerNavbar />
         <Footer />

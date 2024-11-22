@@ -1,10 +1,11 @@
+import AppointmentComponent from "@/components/Appointment";
 
 export default function Home3(){
 
     return (
 
         <>
-        <h1>blooo</h1>
+        <AppointmentComponent />
         </>
     )
 }

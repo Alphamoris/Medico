@@ -11,6 +11,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.0",
     "@hookform/resolvers": "^3.9.1",
+    "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
@@ -25,6 +26,7 @@
     "@tsparticles/engine": "^3.5.0",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.5.0",
+    "@vercel/analytics": "^1.4.1",
     "ai": "^4.0.0",
     "alert": "^6.0.2",
     "avatar": "^0.1.0",
@@ -43,6 +45,7 @@
     "shadcn": "^2.1.6",
     "shadcn-ui": "^0.9.3",
     "simplex-noise": "^4.0.3",
+    "sonner": "^1.7.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"

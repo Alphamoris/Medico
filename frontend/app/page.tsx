@@ -20,6 +20,7 @@ export default function Home() {
   return (
     <>
      <UpperNavbar />
+     <LoginButton />
       <Health />
       <Dive />
       <EmergencyButton />
