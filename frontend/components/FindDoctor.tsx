@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { 
   Star,
   Calendar,
@@ -15,74 +15,124 @@ import {
   CheckCircle2,
   Video,
   MessageSquare,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  AlertCircle,
+  Stethoscope,
+  GraduationCap,
+  Languages,
+  Building,
+  Shield
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { format, addDays, isSameDay } from 'date-fns';
+import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 const FindDoctor = () => {
   const [selectedSpeciality, setSelectedSpeciality] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
-  const [activeTab, setActiveTab] = useState('about');
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState('');
+  const [timeFilter, setTimeFilter] = useState('');
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedSlot, setSelectedSlot] = useState<{time: string, period: string} | null>(null);
+  const [bookingStep, setBookingStep] = useState(1);
+  const [patientNotes, setPatientNotes] = useState('');
+  const [consultationType, setConsultationType] = useState<'video' | 'in-person'>('in-person');
 
-  const doctors = [
+  // Memoize the notes change handler
+  const handleNotesChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPatientNotes(e.target.value);
+  }, []);
+
+  // Memoize next 14 days calculation
+  const nextFourteenDays = useMemo(() => 
+    Array.from({length: 14}, (_, i) => addDays(new Date(), i)),
+    []
+  );
+
+  const doctors = useMemo(() => [
     {
       id: 1,
-      name: "Dr. Sarah Wilson",
+      name: "Dr. Sarah Johnson",
       speciality: "Cardiologist",
-      rating: 4.9,
-      reviews: 127,
-      experience: "15+ years",
-      image: "/logo.ico",
+      rating: 4.8,
+      reviews: 125,
+      experience: "15 years",
+      image: "/doctors/doctor1.jpg",
       nextAvailable: "Today",
       location: "New York Medical Center",
       patients: "2000+",
-      education: "Harvard Medical School",
+      education: "MD - Cardiology, MBBS",
       languages: [
-        { id: "1", name: "English" },
-        { id: "2", name: "Spanish" }
+        { id: "en", name: "English" },
+        { id: "es", name: "Spanish" }
       ],
-      consultationFee: "$150",
+      consultationFee: 1500,
       availability: ["Mon", "Wed", "Fri"],
       verified: true,
       awards: 3,
-      bio: "Dr. Wilson is a board-certified cardiologist with extensive experience in treating complex cardiac conditions.",
-      timeSlots: [
-        { time: "9:00 AM", available: true },
-        { time: "10:00 AM", available: false },
-        { time: "11:00 AM", available: true },
-        { time: "2:00 PM", available: true }
-      ]
+      bio: "Experienced cardiologist specializing in preventive cardiology and heart disease management.",
+      timeSlots: {
+        morning: [
+          { time: "09:00", available: true },
+          { time: "10:00", available: false },
+          { time: "11:00", available: true }
+        ],
+        evening: [
+          { time: "16:00", available: true },
+          { time: "17:00", available: true },
+          { time: "18:00", available: false }
+        ]
+      },
+      specializations: ["Interventional Cardiology", "Heart Failure"],
+      insuranceAccepted: ["Blue Cross", "Aetna", "Cigna"],
+      hospitalAffiliations: ["New York Medical Center", "City Hospital"]
     },
     {
       id: 2,
-      name: "Dr. James Chen",
-      speciality: "Neurologist",
-      rating: 4.8,
-      reviews: 98,
-      experience: "12+ years",
-      image: "/logo.ico",
+      name: "Dr. Michael Chen",
+      speciality: "Orthopedic Surgeon", 
+      rating: 4.9,
+      reviews: 180,
+      experience: "12 years",
+      image: "/doctors/doctor2.jpg",
       nextAvailable: "Tomorrow",
-      location: "Central Hospital",
+      location: "City Hospital",
       patients: "1500+",
-      education: "Stanford Medical School",
+      education: "MD - Orthopedics, MBBS",
       languages: [
-        { id: "1", name: "English" },
-        { id: "3", name: "Mandarin" }
+        { id: "en", name: "English" },
+        { id: "zh", name: "Chinese" }
       ],
-      consultationFee: "$180",
+      consultationFee: 2000,
       availability: ["Tue", "Thu", "Sat"],
       verified: true,
       awards: 2,
-      bio: "Dr. Chen specializes in neurological disorders and innovative treatment approaches.",
-      timeSlots: [
-        { time: "9:00 AM", available: true },
-        { time: "10:00 AM", available: true },
-        { time: "11:00 AM", available: false },
-        { time: "2:00 PM", available: true }
-      ]
+      bio: "Specialized in joint replacement surgery and sports medicine.",
+      timeSlots: {
+        morning: [
+          { time: "09:30", available: true },
+          { time: "10:30", available: true },
+          { time: "11:30", available: false }
+        ],
+        evening: [
+          { time: "15:30", available: false },
+          { time: "16:30", available: true },
+          { time: "17:30", available: true }
+        ]
+      },
+      specializations: ["Joint Replacement", "Sports Medicine"],
+      insuranceAccepted: ["United Healthcare", "Aetna"],
+      hospitalAffiliations: ["City Hospital", "Sports Medicine Center"]
     }
-  ];
+  ], []);
 
   interface Doctor {
     id: number;
@@ -97,318 +147,514 @@ const FindDoctor = () => {
     patients: string;
     education: string;
     languages: Array<{ id: string; name: string }>;
-    consultationFee: string;
+    consultationFee: number;
     availability: string[];
     verified: boolean;
     awards: number;
     bio: string;
-    timeSlots: Array<{ time: string; available: boolean }>;
+    timeSlots: {
+      morning: Array<{ time: string; available: boolean }>;
+      evening: Array<{ time: string; available: boolean }>;
+    };
+    specializations: string[];
+    insuranceAccepted: string[];
+    hospitalAffiliations: string[];
   }
-  
+
   interface DoctorCardProps {
     doctor: Doctor;
   }
-  
-  interface ModalProps {
-    doctor: Doctor;
-    onClose: () => void;
-  }
 
-  const specialities = ['All', 'Cardiologist', 'Neurologist', 'Pediatrician'];
-
-  const toggleFavorite = (doctorId: number): void => {
-    setFavoriteIds((prev: number[]) => 
+  const toggleFavorite = useCallback((doctorId: number): void => {
+    setFavoriteIds(prev => 
       prev.includes(doctorId)
         ? prev.filter(id => id !== doctorId)
         : [...prev, doctorId]
     );
-  };
+  }, []);
 
-  const DoctorCard = ({ doctor } : DoctorCardProps | any) => (
-    <div 
-      className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group transform hover:-translate-y-1"
-      onClick={() => setSelectedDoctor(doctor)}
-    >
-      <div className="relative">
-        <img
-          src={doctor.image}
-          alt={doctor.name}
-          className="w-full h-72 object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
-        />
-        <button 
-         aria-label="button"
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/90 hover:bg-white transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleFavorite(doctor.id);
-          }}
+  const sortDoctors = useCallback((doctors: Doctor[]) => {
+    if (sortBy === 'price-low') {
+      return [...doctors].sort((a, b) => a.consultationFee - b.consultationFee);
+    } else if (sortBy === 'price-high') {
+      return [...doctors].sort((a, b) => b.consultationFee - a.consultationFee);
+    } else if (sortBy === 'rating') {
+      return [...doctors].sort((a, b) => b.rating - a.rating);
+    }
+    return doctors;
+  }, [sortBy]);
+
+  const filterByTime = useCallback((doctors: Doctor[]) => {
+    if (!timeFilter) return doctors;
+    return doctors.filter(doctor => {
+      const hasAvailableSlot = [...doctor.timeSlots.morning, ...doctor.timeSlots.evening]
+        .some(slot => slot.available);
+      return hasAvailableSlot;
+    });
+  }, [timeFilter]);
+
+  const handleBooking = useCallback((doctor: Doctor) => {
+    setSelectedDoctor(doctor);
+    setShowBookingModal(true);
+    setBookingStep(1);
+  }, []);
+
+  const BookingModal = React.memo(({ doctor, onClose }: { doctor: Doctor; onClose: () => void }) => {
+    const handleConfirmBooking = () => {
+      if (!selectedSlot) return;
+      
+      toast.success(
+        <div>
+          <h3 className="font-bold">Booking Confirmed!</h3>
+          <p>Appointment with {doctor.name}</p>
+          <p>Date: {format(selectedDate, 'PPP')}</p>
+          <p>Time: {selectedSlot.time}</p>
+          <p>Type: {consultationType === 'video' ? 'Video Consultation' : 'In-person Visit'}</p>
+          <p className="text-sm mt-2">Check your email for details</p>
+        </div>,
+        {
+          duration: 5000,
+          position: 'top-center',
+        }
+      );
+      
+      onClose();
+      setBookingStep(1);
+      setSelectedSlot(null);
+      setPatientNotes('');
+      setConsultationType('in-person');
+    };
+
+    return (
+      <AnimatePresence>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
         >
-          <Heart 
-            className={`w-5 h-5 ${
-              favoriteIds.includes(doctor.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'
-            }`} 
-          />
-        </button>
-
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-          <div className="flex justify-between items-center text-white">
-            <div className="flex items-center gap-3">
-              <Award className="w-5 h-5 text-yellow-400" />
-              <span>{doctor.awards} Awards</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Star className="w-5 h-5 text-yellow-400" />
-              <span className="font-semibold">{doctor.rating}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-6">
-        <div className="mb-4">
-          <div className="flex items-center gap-2">
-            <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
-              {doctor.name}
-            </h3>
-            {doctor.verified && (
-              <CheckCircle2 className="w-5 h-5 text-green-500" />
-            )}
-          </div>
-          <p className="text-blue-600 font-medium mt-1">{doctor.speciality}</p>
-          <div className="flex items-center gap-2 mt-2 text-gray-600 text-sm">
-            <MapPin className="w-4 h-4" />
-            <span>{doctor.location}</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-blue-50 p-3 rounded-xl">
-            <div className="flex items-center text-blue-700">
-              <Users className="w-4 h-4 mr-2" />
-              <span className="font-medium">{doctor.patients}</span>
-            </div>
-            <p className="text-sm text-blue-600 mt-1">Patients</p>
-          </div>
-          <div className="bg-purple-50 p-3 rounded-xl">
-            <div className="flex items-center text-purple-700">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              <span className="font-medium">{doctor.reviews}</span>
-            </div>
-            <p className="text-sm text-purple-600 mt-1">Reviews</p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between bg-green-50 p-3 rounded-xl">
-            <div className="flex items-center text-green-700">
-              <Calendar className="w-4 h-4 mr-2" />
-              <span>Next Available</span>
-            </div>
-            <span className="font-medium text-green-700">{doctor.nextAvailable}</span>
-          </div>
-
-          <div className="flex gap-3">
-            <button className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-xl hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Book Now
-            </button>
-            <button aria-label="button" className="px-4 py-3 border-2 border-blue-200 rounded-xl hover:bg-blue-50 transition-all duration-300">
-              <Phone className="w-4 h-4 text-blue-600" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const Modal = ({ doctor , onClose } : ModalProps) => (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white z-10 p-4 border-b flex justify-between items-center">
-          <h2 className="text-2xl font-bold">{doctor.name}</h2>
-          <button 
-           aria-label="button"
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="bg-white rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto"
           >
-            <X className="w-6 h-6" />
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">Book Appointment</h2>
+                <p className="text-gray-600">Step {bookingStep} of 3</p>
+              </div>
+              <button aria-label="Close" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {bookingStep === 1 && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-4 p-4 bg-teal-50 rounded-xl">
+                  <img src={doctor.image} alt={doctor.name} className="w-16 h-16 rounded-full object-cover" />
+                  <div>
+                    <h3 className="font-semibold text-lg">{doctor.name}</h3>
+                    <p className="text-gray-600">{doctor.speciality}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Star className="w-4 h-4 text-yellow-400" />
+                      <span>{doctor.rating} ({doctor.reviews} reviews)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Select Consultation Type</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setConsultationType('video')}
+                      className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
+                        consultationType === 'video' ? 'border-teal-500 bg-teal-50' : 'border-gray-200'
+                      }`}
+                    >
+                      <Video className="w-6 h-6 text-teal-600" />
+                      <span>Video Call</span>
+                      <span className="text-sm text-gray-600">₹{doctor.consultationFee * 0.8}</span>
+                    </button>
+                    <button
+                      onClick={() => setConsultationType('in-person')}
+                      className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
+                        consultationType === 'in-person' ? 'border-teal-500 bg-teal-50' : 'border-gray-200'
+                      }`}
+                    >
+                      <Users className="w-6 h-6 text-teal-600" />
+                      <span>In-person</span>
+                      <span className="text-sm text-gray-600">₹{doctor.consultationFee}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setBookingStep(2)}
+                  className="w-full py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors"
+                >
+                  Continue
+                </button>
+              </div>
+            )}
+
+            {bookingStep === 2 && (
+              <div className="space-y-6">
+                <div className="mb-6">
+                  <h4 className="font-semibold mb-3">Select Date</h4>
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {nextFourteenDays.map((date) => (
+                      <button
+                        key={date.toISOString()}
+                        onClick={() => setSelectedDate(date)}
+                        className={`flex-shrink-0 p-3 rounded-xl border-2 transition-all ${
+                          isSameDay(selectedDate, date)
+                            ? 'border-teal-500 bg-teal-50'
+                            : 'border-gray-200 hover:border-teal-200'
+                        }`}
+                      >
+                        <p className="text-sm font-medium">{format(date, 'EEE')}</p>
+                        <p className="text-lg font-bold">{format(date, 'd')}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Available Slots</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="text-sm font-medium mb-2">Morning</h5>
+                      <div className="grid grid-cols-2 gap-2">
+                        {doctor.timeSlots.morning.map((slot) => (
+                          <button
+                            key={slot.time}
+                            disabled={!slot.available}
+                            onClick={() => setSelectedSlot({ time: slot.time, period: 'morning' })}
+                            className={`p-2 rounded-lg border-2 transition-all ${
+                              selectedSlot?.time === slot.time && selectedSlot?.period === 'morning'
+                                ? 'border-teal-500 bg-teal-50'
+                                : slot.available
+                                ? 'border-gray-200 hover:border-teal-200'
+                                : 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            {slot.time}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h5 className="text-sm font-medium mb-2">Evening</h5>
+                      <div className="grid grid-cols-2 gap-2">
+                        {doctor.timeSlots.evening.map((slot) => (
+                          <button
+                            key={slot.time}
+                            disabled={!slot.available}
+                            onClick={() => setSelectedSlot({ time: slot.time, period: 'evening' })}
+                            className={`p-2 rounded-lg border-2 transition-all ${
+                              selectedSlot?.time === slot.time && selectedSlot?.period === 'evening'
+                                ? 'border-teal-500 bg-teal-50'
+                                : slot.available
+                                ? 'border-gray-200 hover:border-teal-200'
+                                : 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            {slot.time}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setBookingStep(1)}
+                    className="flex-1 px-6 py-3 border-2 border-gray-200 rounded-xl hover:bg-gray-50"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={() => selectedSlot && setBookingStep(3)}
+                    disabled={!selectedSlot}
+                    className={`flex-1 px-6 py-3 rounded-xl text-white ${
+                      selectedSlot ? 'bg-teal-600 hover:bg-teal-700' : 'bg-gray-300 cursor-not-allowed'
+                    }`}
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {bookingStep === 3 && (
+              <div className="space-y-6">
+                <div className="bg-teal-50 p-4 rounded-xl space-y-2">
+                  <h4 className="font-semibold">Booking Summary</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-gray-600">Date</p>
+                      <p className="font-medium">{format(selectedDate, 'PPP')}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Time</p>
+                      <p className="font-medium">{selectedSlot?.time}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Type</p>
+                      <p className="font-medium">{consultationType === 'video' ? 'Video Call' : 'In-person'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Fee</p>
+                      <p className="font-medium">₹{consultationType === 'video' ? doctor.consultationFee * 0.8 : doctor.consultationFee}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 p-4 rounded-xl flex gap-3">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+                  <p className="text-sm text-yellow-700">
+                    Please arrive 10 minutes before your appointment time. Bring any relevant medical records or test results.
+                  </p>
+                </div>
+
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setBookingStep(2)}
+                    className="flex-1 px-6 py-3 border-2 border-gray-200 rounded-xl hover:bg-gray-50"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={handleConfirmBooking}
+                    className="flex-1 px-6 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700"
+                  >
+                    Confirm & Pay
+                  </button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  });
+
+  const DoctorCard = React.memo<DoctorCardProps>(({ doctor }) => {
+    const isFavorite = favoriteIds.includes(doctor.id);
+
+    return (
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="flex justify-between items-start">
+          <div className="flex gap-4">
+            <img src={doctor.image} alt={doctor.name} className="w-24 h-24 rounded-xl object-cover" />
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-lg">{doctor.name}</h3>
+                {doctor.verified && (
+                  <CheckCircle2 className="w-5 h-5 text-teal-600" />
+                )}
+              </div>
+              <p className="text-gray-600">{doctor.speciality}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <Star className="w-4 h-4 text-yellow-400" />
+                <span>{doctor.rating}</span>
+                <span className="text-gray-600">({doctor.reviews} reviews)</span>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <Users className="w-4 h-4 text-teal-600" />
+                <span className="text-gray-600">{doctor.patients} patients</span>
+              </div>
+            </div>
+          </div>
+          <button 
+            onClick={() => toggleFavorite(doctor.id)}
+            className={`p-2 rounded-full ${isFavorite ? 'text-red-500 hover:bg-red-50' : 'text-gray-400 hover:bg-gray-50'}`}
+          >
+            <Heart className="w-6 h-6" fill={isFavorite ? "currentColor" : "none"} />
           </button>
         </div>
 
-        <div className="p-6">
-          <div className="flex gap-6 mb-8">
-            <img 
-              src={doctor.image} 
-              alt={doctor.name}
-              className="w-32 h-32 rounded-xl object-cover"
-            />
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-2xl font-bold">{doctor.name}</h3>
-                {doctor.verified && (
-                  <CheckCircle2 className="w-5 h-5 text-green-500" />
-                )}
+        <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 text-teal-600" />
+              <div>
+                <p className="text-sm text-gray-600">Education</p>
+                <p className="font-medium">{doctor.education}</p>
               </div>
-              <p className="text-blue-600 font-medium mb-2">{doctor.speciality}</p>
-              <p className="text-gray-600">{doctor.bio}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Award className="w-5 h-5 text-teal-600" />
+              <div>
+                <p className="text-sm text-gray-600">Experience</p>
+                <p className="font-medium">{doctor.experience}</p>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div className="flex gap-4 border-b mb-6">
-            {['about', 'schedule', 'reviews'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 font-medium capitalize transition-colors relative ${
-                  activeTab === tab ? 'text-blue-600' : 'text-gray-600'
-                }`}
-              >
-                {tab}
-                {activeTab === tab && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-                )}
-              </button>
+        <div className="mt-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Stethoscope className="w-5 h-5 text-teal-600" />
+            <span className="font-medium">Specializations</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {doctor.specializations.map((spec, index) => (
+              <span key={index} className="px-3 py-1 bg-teal-50 text-teal-700 rounded-full text-sm">
+                {spec}
+              </span>
             ))}
           </div>
+        </div>
 
-          <div className="space-y-6">
-            {activeTab === 'about' && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-blue-50 p-4 rounded-xl">
-                  <h4 className="font-medium mb-2">Education</h4>
-                  <p className="text-gray-600">{doctor.education}</p>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-xl">
-                  <h4 className="font-medium mb-2">Consultation Fee</h4>
-                  <p className="text-gray-600">{doctor.consultationFee}</p>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'schedule' && (
-              <div className="grid grid-cols-2 gap-4">
-                {doctor.timeSlots.map((slot: { available: any; time: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; }, i: React.Key | null | undefined) => (
-                  <button
-                    key={i}
-                    disabled={!slot.available}
-                    className={`p-4 rounded-xl text-left transition-all ${
-                      slot.available
-                        ? 'bg-white border-2 border-blue-200 hover:border-blue-600'
-                        : 'bg-gray-50 cursor-not-allowed'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={slot.available ? 'text-gray-900' : 'text-gray-400'}>
-                        {slot.time}
-                      </span>
-                      {slot.available ? (
-                        <span className="text-green-600 text-sm">Available</span>
-                      ) : (
-                        <span className="text-gray-400 text-sm">Booked</span>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-teal-600" />
+            <div>
+              <p className="text-sm text-gray-600">Location</p>
+              <p className="font-medium">{doctor.location}</p>
+            </div>
           </div>
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-teal-600" />
+            <div>
+              <p className="text-sm text-gray-600">Next Available</p>
+              <p className="font-medium">{doctor.nextAvailable}</p>
+            </div>
+          </div>
+        </div>
 
-          <div className="sticky bottom-0 bg-white border-t mt-6 p-4 flex gap-4">
-            <button className="flex-1 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-              <Calendar className="w-4 h-4" />
+        <div className="mt-4 flex items-center justify-between p-4 bg-teal-50 rounded-xl">
+          <div>
+            <p className="text-sm text-gray-600">Consultation Fee</p>
+            <p className="text-xl font-bold text-teal-700">₹{doctor.consultationFee}</p>
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={() => handleBooking(doctor)}
+              className="bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition-colors"
+            >
               Book Appointment
             </button>
-            <button aria-label="button" className="px-6 py-3 border-2 border-blue-200 rounded-xl hover:bg-blue-50 transition-colors">
-              <Video className="w-4 h-4 text-blue-600" />
-            </button>
-            <button aria-label="button" className="px-6 py-3 border-2 border-blue-200 rounded-xl hover:bg-blue-50 transition-colors">
-              <MessageSquare className="w-4 h-4 text-blue-600" />
+            <button aria-label="Chat with doctor" className="p-2 border-2 border-teal-600 rounded-xl hover:bg-teal-50 transition-colors">
+              <MessageCircle className="w-5 h-5 text-teal-600" />
             </button>
           </div>
         </div>
       </div>
-    </div>
+    );
+  });
+
+  const filteredDoctors = useMemo(() => 
+    sortDoctors(filterByTime(doctors.filter(doctor => 
+      (selectedSpeciality === 'All' || doctor.speciality === selectedSpeciality) &&
+      (doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       doctor.speciality.toLowerCase().includes(searchQuery.toLowerCase()))
+    ))),
+    [doctors, selectedSpeciality, searchQuery, sortDoctors, filterByTime]
   );
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto px-4 pt-14 ">
-        <div className="text-center mb-3">
-          <h1 className="text-5xl font-bold text-gray-800 mb-1">Find Your Perfect Doctor</h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Connect with top-rated healthcare professionals in your area
-          </p>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div className="flex items-center gap-4">
+          <div className="relative w-12 h-12 md:w-16 md:h-16">
+            <Image
+              src="/logo.ico"
+              alt="Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Find Doctors</h1>
+            <p className="text-gray-600 mt-1 text-sm">Book appointments with the best doctors</p>
+          </div>
         </div>
-
-        <div className="max-w-4xl mx-auto mb-4">
-          <div className="flex gap-4 mb-4">
-            <div className="flex-1 relative">
-              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search by name, speciality, or location..."
-                className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors"
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <button className="px-6 py-3 bg-white border-2 border-gray-200 rounded-xl flex items-center gap-2 hover:bg-gray-50 transition-colors">
+        
+        <div className="flex gap-4 w-full md:w-auto">
+          <div className="relative flex-1 md:w-80">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search doctors, specialities..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-teal-500 focus:outline-none"
+            />
+          </div>
+          <div className="relative">
+            <button
+              title="Filters"
+              onClick={() => setShowFilters(!showFilters)}
+              className="p-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+            >
               <Sliders className="w-5 h-5" />
-              Filters
             </button>
-          </div>
-
-          <div className="flex flex-wrap gap-3 justify-center">
-            {specialities.map((speciality) => (
-              <button
-                key={speciality}
-                onClick={() => setSelectedSpeciality(speciality)}
-                className={`px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 ${
-                  selectedSpeciality === speciality
-                    ? 'bg-blue-600 text-white shadow-lg scale-105'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200'
-                }`}
-              >
-                {speciality}
-              </button>
-            ))}
+            {showFilters && (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 p-4 z-10">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Sort by</label>
+                    <select
+                      title="Sort by"
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="w-full p-2 rounded-lg border border-gray-200"
+                    >
+                      <option value="">Relevance</option>
+                      <option value="rating">Rating</option>
+                      <option value="price-low">Price: Low to High</option>
+                      <option value="price-high">Price: High to Low</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Availability</label>
+                    <select
+                      title="Availability"
+                      value={timeFilter}
+                      onChange={(e) => setTimeFilter(e.target.value)}
+                      className="w-full p-2 rounded-lg border border-gray-200"
+                    >
+                      <option value="">Any time</option>
+                      <option value="today">Available today</option>
+                      <option value="tomorrow">Available tomorrow</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {doctors
-            .filter(doctor => 
-              (selectedSpeciality === 'All' || doctor.speciality === selectedSpeciality) &&
-              (searchQuery === '' || 
-                doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                doctor.speciality.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                doctor.location.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-            )
-            .map(doctor => (
-              <DoctorCard key={doctor.id} doctor={doctor} />
-            ))}
-        </div>
-
-        {doctors.filter(doctor => 
-          (selectedSpeciality === 'All' || doctor.speciality === selectedSpeciality) &&
-          (searchQuery === '' || 
-            doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            doctor.speciality.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            doctor.location.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-        ).length === 0 && (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-medium text-gray-700 mb-2">No doctors found</h3>
-            <p className="text-gray-500">Try adjusting your search criteria</p>
-          </div>
-        )}
       </div>
 
-      {selectedDoctor && (
-        <Modal 
-          doctor={selectedDoctor} 
-          onClose={() => setSelectedDoctor(null)} 
-        />
+      <div className="flex gap-4 overflow-x-auto pb-4 mb-6">
+        {['All', 'Cardiologist', 'Dermatologist', 'Orthopedic', 'Pediatrician', 'Neurologist'].map((speciality) => (
+          <button
+            key={speciality}
+            onClick={() => setSelectedSpeciality(speciality)}
+            className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+              selectedSpeciality === speciality
+                ? 'bg-teal-600 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            {speciality}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {filteredDoctors.map((doctor) => (
+          <DoctorCard key={doctor.id} doctor={doctor} />
+        ))}
+      </div>
+
+      {selectedDoctor && showBookingModal && (
+        <BookingModal doctor={selectedDoctor} onClose={() => setShowBookingModal(false)} />
       )}
     </div>
   );

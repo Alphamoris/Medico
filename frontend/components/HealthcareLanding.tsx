@@ -356,7 +356,7 @@ const HealthcareLanding: React.FC = () => {
                 ].map((stat, index) => (
                   <div key={index} className="text-center">
                     <h3 className="text-3xl font-bold text-gray-900 mb-1">
-                      <AnimatedCounter end={0} {...stat} />
+                      <AnimatedCounter end={stat.value} suffix={stat.suffix} />
                     </h3>
                     <p className="text-gray-600">{stat.label}</p>
                   </div>
@@ -412,6 +412,69 @@ const HealthcareLanding: React.FC = () => {
                   <TestimonialCard key={index} {...testimonial} />
                 ))}
               </div>
+            </div>
+          </section>
+
+          {/* Feedback Comment Form Section */}
+          <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-teal-50 to-white">
+            <div className="container mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="text-center mb-16"
+              >
+                <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                  We'd Love to Hear From You!
+                </h2>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                  "Your feedback fuels our passion to provide exceptional healthcare services."
+                </p>
+              </motion.div>
+              <form className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-8">
+                <div className="mb-4">
+                  <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+                    placeholder="Enter your name"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">
+                    Your Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div className="mb-6">
+                  <label htmlFor="message" className="block text-gray-700 font-semibold mb-2">
+                    Your Feedback
+                  </label>
+                  <textarea
+                    id="message"
+                    rows={4}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+                    placeholder="Share your thoughts with us"
+                    required
+                  ></textarea>
+                </div>
+                <div className="text-center">
+                  <Button type="submit" className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg">
+                    Submit Feedback
+                  </Button>
+                </div>
+              </form>
             </div>
           </section>
 

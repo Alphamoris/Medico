@@ -59,6 +59,7 @@ interface Post {
   readTime: string;
   trending: boolean;
   image?: string;
+  completedTime?: string; // Added completedTime field
 }
 
 const categories = [
@@ -69,7 +70,7 @@ const categories = [
   { id: 'lifestyle', label: 'Lifestyle', icon: '🌱' }
 ];
 
-const PostCard: React.FC<{ post: Post; onLike: (id: string) => void; onComment: (id: string, text: string) => void }> = React.memo(({ post, onLike, onComment }) => {
+const PostCard = React.memo(({ post, onLike, onComment }: { post: Post; onLike: (id: string) => void; onComment: (id: string, text: string) => void }) => {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,7 +112,10 @@ const PostCard: React.FC<{ post: Post; onLike: (id: string) => void; onComment: 
             )}
             <span className="text-sm text-teal-600 font-medium">{post.author.role}</span>
           </div>
-          <p className="text-sm text-gray-500">{post.timestamp} • {post.readTime}</p>
+          <p className="text-sm text-gray-500">
+            {post.timestamp} • {post.readTime}
+            {post.completedTime && ` • Completed ${post.completedTime}`}
+          </p>
         </div>
       </CardHeader>
 
@@ -259,6 +263,7 @@ const HealthFeed: React.FC = () => {
           },
           content: 'New research suggests that incorporating Mediterranean diet principles can significantly improve heart health and cognitive function. Here are the key takeaways from the latest study...',
           timestamp: '2 hours ago',
+          completedTime: '1 hour ago', // Added completed time
           likes: 245,
           liked: false,
           comments: [
@@ -319,6 +324,7 @@ const HealthFeed: React.FC = () => {
           },
           content: 'Stop focusing on lengthy cardio sessions! High-Intensity Interval Training (HIIT) can give you better results in less time. Here\'s a 20-minute workout that burns more calories than an hour of jogging...',
           timestamp: '4 hours ago',
+          completedTime: '3 hours ago', // Added completed time
           likes: 189,
           liked: false,
           comments: [
@@ -439,188 +445,27 @@ const HealthFeed: React.FC = () => {
     });
   }, [posts, searchQuery, filters, selectedTab]);
 
-  const [isPostSubmitting, setIsPostSubmitting] = useState(false);
-    const [showPostSuccess, setShowPostSuccess] = useState(false);
-    const [postContent, setPostContent] = useState('');
-    const [selectedTags, setSelectedTags] = useState<string[]>([]);
-    const [isPostWindowOpen, setIsPostWindowOpen] = useState(false);
-
-    const handlePostSubmit = async (formData: FormData) => {
-      try {
-        setIsPostSubmitting(true);
-
-        // Create new post
-        const newPost: Partial<Post> = {
-          id: Date.now().toString(),
-          author: {
-            id: 'current-user',
-            name: 'You', 
-            avatar: '/logo.ico',
-            role: 'Member',
-            verified: false
-          },
-          content: formData.get('content') as string,
-          timestamp: 'Just now',
-          likes: 0,
-          liked: false,
-          comments: [],
-          shares: 0,
-          tags: Array.from(formData.getAll('tags') as string[]),
-          readTime: '1 min read',
-          trending: false
-        };
-
-        setPosts(currentPosts => [newPost as Post, ...currentPosts]);
-        
-        // Reset form and close window
-        setPostContent('');
-        setSelectedTags([]);
-        setIsPostWindowOpen(false);
-        
-        // Show success message
-        setShowPostSuccess(true);
-        setTimeout(() => setShowPostSuccess(false), 3000);
-
-        toast({
-          title: "Post created",
-          description: "Your post has been shared successfully!",
-          className: "bg-teal-50 border-teal-500"
-        });
-
-      } catch (error) {
-        toast({
-          title: "Error", 
-          description: "Failed to create post. Please try again.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsPostSubmitting(false);
-      }
-    };
-
   return (
-    
     <>
-    
-    <div className="bg-gradient-to-r from-teal-500 to-teal-600 text-white py-4 sm:py-8 px-4 mb-0 rounded-lg shadow-lg">
+    <div className="bg-white py-2 px-4 mb-0 rounded-lg shadow-sm">
       <div className="container mx-auto max-w-3xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Health & Wellness Feed</h1>
-            <p className="text-teal-100">Share and discover health insights from experts</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Image src="/logo.ico" alt="Logo" width={62} height={62} />
+            <div>
+              <h1 className="text-md sm:text-xl font-bold mb-1 text-teal-900">Health & Wellness Feed</h1>
+              <p className="text-xs text-teal-600">Share and discover health insights from experts</p>
+            </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-teal-400 hover:bg-teal-300">
-              <TrendingUp className="w-4 h-4 mr-1" />
-              {posts.length} Posts
-            </Badge>
-          </div>
+          <Badge variant="secondary" className="bg-teal-100 text-teal-700  hidden sm:inline-flex">
+            <TrendingUp className="w-3 h-3 mr-1" />
+            {posts.length} Posts
+          </Badge>
         </div>
       </div>
     </div>
 
-    {/* Floating Action Button for New Post */}
-    <div className="fixed bottom-4 sm:bottom-2 right-2 z-50">
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          size="lg"
-          className="rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-lg bg-teal-500 hover:bg-teal-600 text-white"
-        >
-          <BadgePlusIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[90vw] overflow-y-auto max-h-[80vh] sm:w-[400px] p-4">
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          const formData = new FormData(e.currentTarget);
-          const newPost: Partial<Post> = {
-            id: Date.now().toString(),
-            author: {
-              id: 'current-user',
-              name: 'You',
-              avatar: '/logo.ico',
-              role: 'Member',
-              verified: false
-            },
-            content: formData.get('content') as string,
-            timestamp: 'Just now',
-            likes: 0,
-            liked: false,
-            comments: [],
-            shares: 0,
-            tags: Array.from(formData.getAll('tags') as string[]),
-            readTime: formData.get('readTime') as string,
-            trending: false
-          };
-
-          setPosts(prev => [newPost as Post, ...prev]);
-          toast({
-            title: "Post Created",
-            description: "Your insights have been shared with the community!",
-            className: "bg-teal-50 border-teal-500"
-          });
-          e.currentTarget.reset();
-        }}>
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg text-teal-900">Create New Post</h3>
-
-            <div>
-              <label htmlFor="content" className="text-sm font-medium text-teal-700">Content</label>
-              <textarea
-                id="content"
-                name="content"
-                required
-                className="mt-1 w-full rounded-md border-teal-300 focus:border-teal-500 focus:ring focus:ring-teal-200 min-h-[100px]"
-                placeholder="Share your health insights..." />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-teal-700">Tags</label>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {categories.map(category => (
-                  <label key={category.id} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      name="tags"
-                      value={category.label}
-                      className="rounded border-teal-300 text-teal-500 focus:ring-teal-200"
-                    />
-                    <Badge
-                      variant="outline"
-                      className="cursor-pointer hover:bg-teal-50"
-                    >
-                      {category.icon} {category.label}
-                    </Badge>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="readTime" className="text-sm font-medium text-teal-700">Estimated Read Time</label>
-              <Input
-                id="readTime"
-                name="readTime"
-                type="text"
-                required
-                placeholder="e.g. 3 min read"
-                className="mt-1 border-teal-300 focus:border-teal-500 focus:ring-teal-200" />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-teal-500 hover:bg-teal-600 text-white"
-            >
-              Publish Post
-            </Button>
-          </div>
-        </form>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  </div>
-
-  <div className="container mx-auto max-w-3xl px-4 py-4 sm:py-8 space-y-6">
+    <div className="container mx-auto max-w-3xl px-4 py-4 space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-teal-500" />
@@ -783,10 +628,10 @@ const HealthFeed: React.FC = () => {
       </Tabs>
 
       {filteredPosts.length === 0 && !isLoading && (
-        <div className="text-center py-8 sm:py-12">
+        <div className="text-center py-8">
           <div className="text-gray-400 mb-4">
-            <Search className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold">No posts found</h3>
+            <Search className="w-8 h-8 mx-auto mb-2" />
+            <h3 className="text-base font-medium">No posts found</h3>
             <p className="text-sm">Try adjusting your search or filters</p>
           </div>
           <Button
@@ -795,8 +640,8 @@ const HealthFeed: React.FC = () => {
               setSearchQuery('');
               setFilters([]);
               setSelectedTab('forYou');
-            } }
-            className="mt-4"
+            }}
+            className="mt-2"
           >
             Clear all filters
           </Button>

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Toast, ToastProvider } from '@/components/ui/toast';
+import Image from 'next/image';
 import {
   Upload,
   ShoppingCart,
@@ -24,7 +25,11 @@ import {
   ChevronDown,
   Star,
   ChevronUp,
-  X
+  X,
+  Calendar,
+  Factory,
+  Pill,
+  Grid
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -57,11 +62,55 @@ interface Category {
 
 // Enhanced dummy data
 const medicines: Record<string, Medicine[]> = {
+  all: [
+    {
+      id: 1,
+      name: 'Paracetamol 500mg',
+      price: 199,
+      category: 'Pain Relief',
+      stock: 50,
+      description: 'Fast-acting pain reliever for headaches and fever',
+      dosage: '1-2 tablets every 4-6 hours',
+      requires_prescription: false,
+      rating: 4.5,
+      reviews: 128,
+      discount: 10,
+      expiry: '2025-12',
+      manufacturer: 'PharmaCare Inc.'
+    },
+    {
+      id: 4,
+      name: 'Aspirin 75mg',
+      price: 299,
+      category: 'Blood Thinners',
+      stock: 40,
+      description: 'Daily blood thinner for cardiovascular health',
+      dosage: '1 tablet daily',
+      requires_prescription: true,
+      rating: 4.8,
+      reviews: 256,
+      manufacturer: 'HeartCare Pharmaceuticals'
+    },
+    {
+      id: 6,
+      name: 'Calcium + D3',
+      price: 399,
+      category: 'Supplements',
+      stock: 60,
+      description: 'Essential supplement for bone health',
+      dosage: '1 tablet twice daily',
+      requires_prescription: false,
+      rating: 4.6,
+      reviews: 189,
+      discount: 15,
+      manufacturer: 'BoneHealth Labs'
+    }
+  ],
   general: [
     {
       id: 1,
       name: 'Paracetamol 500mg',
-      price: 5.99,
+      price: 199,
       category: 'Pain Relief',
       stock: 50,
       description: 'Fast-acting pain reliever for headaches and fever',
@@ -78,7 +127,7 @@ const medicines: Record<string, Medicine[]> = {
     {
       id: 4,
       name: 'Aspirin 75mg',
-      price: 6.99,
+      price: 299,
       category: 'Blood Thinners',
       stock: 40,
       description: 'Daily blood thinner for cardiovascular health',
@@ -93,7 +142,7 @@ const medicines: Record<string, Medicine[]> = {
     {
       id: 6,
       name: 'Calcium + D3',
-      price: 9.99,
+      price: 399,
       category: 'Supplements',
       stock: 60,
       description: 'Essential supplement for bone health',
@@ -108,24 +157,24 @@ const medicines: Record<string, Medicine[]> = {
 };
 
 const categories: Category[] = [
-  { id: 'general', name: 'General', icon: <Package className="h-5 w-5" /> },
-  { id: 'cardiology', name: 'Cardiology', icon: <Heart className="h-5 w-5" /> },
-  { id: 'orthopedic', name: 'Orthopedic', icon: <Tag className="h-5 w-5" /> },
+  { id: 'all', name: 'All', icon: <Grid className="h-4 w-4" /> },
+  { id: 'general', name: 'General', icon: <Package className="h-4 w-4" /> },
+  { id: 'cardiology', name: 'Heart', icon: <Heart className="h-4 w-4" /> },
+  { id: 'orthopedic', name: 'Bone', icon: <Tag className="h-4 w-4" /> },
 ];
 
 const BuyMedicine: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [prescription, setPrescription] = useState<File | null>(null);
-  const [manualPrescription, setManualPrescription] = useState('');
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showPrescriptionAlert, setShowPrescriptionAlert] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'price' | 'rating' | 'name'>('rating');
   const [showCartToast, setShowCartToast] = useState(false);
   const [showFloatingCart, setShowFloatingCart] = useState(false);
-  const [showCartDetails, setShowCartDetails] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [addedItem, setAddedItem] = useState<Medicine | null>(null);
+  const [filterType, setFilterType] = useState<'all' | 'prescription' | 'otc'>('all');
+  const [showConfirmation, setShowConfirmation] = useState(false);
   
   const cartRef = useRef<HTMLDivElement>(null);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -149,8 +198,33 @@ const BuyMedicine: React.FC = () => {
     };
   }, []);
 
+  const handlePrescriptionUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setPrescription(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file && (file.type === 'application/pdf' || file.type.startsWith('image/'))) {
+      setPrescription(file);
+    }
+  };
+
   const addToCart = useCallback((medicine: Medicine) => {
-    if (medicine.requires_prescription && !prescription && !manualPrescription) {
+    if (medicine.requires_prescription && !prescription) {
       setShowPrescriptionAlert(true);
       return;
     }
@@ -167,39 +241,33 @@ const BuyMedicine: React.FC = () => {
       return [...prevCart, { ...medicine, quantity: 1 }];
     });
     
+    setAddedItem(medicine);
     setShowCartToast(true);
-    setTimeout(() => setShowCartToast(false), 2000);
-  }, [prescription, manualPrescription]);
+    setShowConfirmation(true);
+    setTimeout(() => {
+      setShowCartToast(false);
+      setAddedItem(null);
+      setShowConfirmation(false);
+    }, 2000);
+  }, [prescription]);
 
   const filteredMedicines = React.useMemo(() => {
-    let filtered = medicines[activeTab].filter(medicine =>
-      medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      medicine.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (selectedFilters.length > 0) {
-      filtered = filtered.filter(medicine =>
-        selectedFilters.some(filter => medicine.category === filter)
-      );
-    }
-
-    return filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'price':
-          return a.price - b.price;
-        case 'rating':
-          return (b.rating || 0) - (a.rating || 0);
-        case 'name':
-          return a.name.localeCompare(b.name);
-        default:
-          return 0;
+    return medicines[activeTab].filter(medicine => {
+      const matchesSearch = medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        medicine.category.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (filterType === 'prescription') {
+        return matchesSearch && medicine.requires_prescription;
+      } else if (filterType === 'otc') {
+        return matchesSearch && !medicine.requires_prescription;
       }
+      return matchesSearch;
     });
-  }, [activeTab, searchTerm, selectedFilters, sortBy]);
+  }, [activeTab, searchTerm, filterType]);
 
   const calculateTotal = useCallback(() => {
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const deliveryFee = subtotal > 50 ? 0 : 5;
+    const deliveryFee = subtotal > 399 ? 0 : 40;
     return {
       subtotal,
       deliveryFee,
@@ -215,77 +283,212 @@ const BuyMedicine: React.FC = () => {
   return (
     <ToastProvider>
       <div className="min-h-screen bg-indigo-100">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 text-white shadow-lg">
-          <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12 lg:py-16">
+        {/* Compact Header */}
+        <div className="bg-indigo-100 text-white shadow-lg">
+          <div className="max-w-6xl mx-auto px-4 py-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-center"
+              className="flex items-center"
             >
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
-                Your Health, Our Priority
-              </h1>
-              <p className="text-xl opacity-90 max-w-2xl mx-auto">
-                Get your medications delivered safely and securely to your doorstep
-              </p>
+              <Image src="/logo.ico" alt="Website Logo" width={70} height={70} className="mr-4" />
+              <div>
+                <h1 className="text-2md sm:text-3xl font-bold mb-1 text-teal-700">
+                  Your Health, Our Priority
+                </h1>
+                <p className="text-sm sm:text-base text-teal-600">
+                  Safe and secure medication delivery
+                </p>
+              </div>
             </motion.div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Search and Filter Section */}
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
-            <div className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          {/* Prescription Upload Area */}
+          <div 
+            className={`mb-6 p-6 border-2 border-dashed rounded-lg text-center transition-colors ${
+              isDragging ? 'border-teal-500 bg-teal-50' : 'border-teal-200'
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              onChange={handlePrescriptionUpload}
+              className="hidden"
+              id="prescription-upload"
+            />
+            <label htmlFor="prescription-upload" className="cursor-pointer">
+              <div className="flex flex-col items-center gap-2">
+                <Upload className="h-8 w-8 text-teal-500" />
+                <p className="text-teal-700 font-medium">
+                  Drop your prescription here or click to upload
+                </p>
+                <p className="text-sm text-teal-600">
+                  Supports PDF, JPG, PNG (Max 5MB)
+                </p>
+              </div>
+            </label>
+            {prescription && (
+              <div className="mt-4 p-2 bg-teal-100 rounded flex items-center justify-between">
+                <span className="text-teal-700">
+                  <FileText className="h-4 w-4 inline mr-2" />
+                  {prescription.name}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPrescription(null)}
+                  className="text-teal-700 hover:text-teal-900"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Search and Filter */}
+          <div className="mb-6 flex flex-col gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <Input
                 type="text"
-                placeholder="Search medicines..."
+                placeholder="Search medicines by name or category..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
+                className="w-full pl-10 border-teal-200 focus:border-teal-400"
               />
             </div>
-            <Button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2"
-            >
-              <Filter className="h-5 w-5" />
-              Filters
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant={filterType === 'all' ? 'default' : 'outline'}
+                onClick={() => setFilterType('all')}
+                className="border-teal-200 flex-1"
+              >
+                All
+              </Button>
+              <Button
+                variant={filterType === 'prescription' ? 'default' : 'outline'}
+                onClick={() => setFilterType('prescription')}
+                className="border-teal-200 flex-1"
+              >
+                Prescription Only
+              </Button>
+              <Button
+                title='Medicines Without Prescription'
+                variant={filterType === 'otc' ? 'default' : 'outline'}
+                onClick={() => setFilterType('otc')}
+                className="border-teal-200 flex-1"
+              >
+                OTC
+              </Button>
+            </div>
           </div>
 
           {/* Categories Tabs */}
-          <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="mb-8">
-            <TabsList>
+          <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="mb-6">
+            <TabsList className="bg-teal-100 flex flex-wrap">
               {categories.map((category) => (
-                <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-2">
+                <TabsTrigger 
+                  key={category.id} 
+                  value={category.id} 
+                  className="text-xs sm:text-sm data-[state=active]:bg-teal-600 data-[state=active]:text-white flex-1 sm:flex-none"
+                >
                   {category.icon}
-                  {category.name}
+                  <span className="ml-1">{category.name}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
 
             {categories.map((category) => (
               <TabsContent key={category.id} value={category.id}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredMedicines.map((medicine) => (
-                    <Card key={medicine.id}>
-                      <CardHeader>
-                        <CardTitle className="flex justify-between items-start">
-                          <span>{medicine.name}</span>
+                    <Card key={medicine.id} className="border-teal-100 hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start mb-2">
+                          <CardTitle className="text-lg font-bold text-teal-700">
+                            {medicine.name}
+                          </CardTitle>
                           <Badge variant={medicine.requires_prescription ? "destructive" : "default"}>
                             {medicine.requires_prescription ? "Prescription Required" : "OTC"}
                           </Badge>
-                        </CardTitle>
+                        </div>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
-                          <p className="text-gray-600">{medicine.description}</p>
+                          <p className="text-sm text-gray-600">{medicine.description}</p>
+                          
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex items-center text-gray-600">
+                              <Pill className="h-4 w-4 mr-2" />
+                              <span>Dosage: {medicine.dosage}</span>
+                            </div>
+                            <div className="flex items-center text-gray-600">
+                              <Package className="h-4 w-4 mr-2" />
+                              <span>Stock: {medicine.stock}</span>
+                            </div>
+                            <div className="flex items-center text-gray-600">
+                              <Calendar className="h-4 w-4 mr-2" />
+                              <span>Expires: {medicine.expiry}</span>
+                            </div>
+                            <div className="flex items-center text-gray-600">
+                              <Factory className="h-4 w-4 mr-2" />
+                              <span>{medicine.manufacturer}</span>
+                            </div>
+                          </div>
+
                           <div className="flex justify-between items-center">
-                            <span className="text-2xl font-bold">${medicine.price}</span>
-                            <Button onClick={() => addToCart(medicine)}>Add to Cart</Button>
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-4 w-4 ${
+                                      i < Math.floor(medicine.rating || 0)
+                                        ? 'text-yellow-400 fill-current'
+                                        : 'text-gray-300'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-sm text-gray-600">
+                                ({medicine.reviews} reviews)
+                              </span>
+                            </div>
+                            {medicine.discount && (
+                              <Badge variant="secondary" className="bg-teal-100 text-teal-700">
+                                {medicine.discount}% OFF
+                              </Badge>
+                            )}
+                          </div>
+
+                          <div className="flex justify-between items-center pt-2 border-t border-teal-100">
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <span className="text-2xl font-bold text-teal-700">
+                                  ₹{medicine.price}
+                                </span>
+                                {medicine.discount && (
+                                  <span className="text-sm text-gray-500 line-through">
+                                    ₹{(medicine.price * (1 + medicine.discount/100)).toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <Button 
+                              onClick={() => addToCart(medicine)}
+                              className="bg-teal-600 hover:bg-teal-700"
+                              disabled={medicine.requires_prescription && !prescription}
+                            >
+                              <ShoppingCart className="h-4 w-4 mr-2" />
+                              Add to Cart
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -297,10 +500,14 @@ const BuyMedicine: React.FC = () => {
           </Tabs>
 
           {/* Cart Section */}
-          <div ref={cartRef} className="mt-8">
-            <Card>
+          <div ref={cartRef}>
+            <Card className="border-teal-100">
               <CardHeader>
-                <CardTitle>Shopping Cart</CardTitle>
+                <CardTitle className="text-teal-700">Shopping Cart</CardTitle>
+                <div className="text-sm text-teal-600 bg-teal-50 p-3 rounded-md mt-2">
+                  🎉 Free delivery on orders above ₹399! {calculateTotal().subtotal <= 399 && 
+                    `Add items worth ₹${(399 - calculateTotal().subtotal).toFixed(2)} more for free delivery.`}
+                </div>
               </CardHeader>
               <CardContent>
                 {cart.length === 0 ? (
@@ -309,13 +516,14 @@ const BuyMedicine: React.FC = () => {
                   <div className="space-y-4">
                     {cart.map((item) => (
                       <div key={item.id} className="flex justify-between items-center">
-                        <span>{item.name}</span>
+                        <span className="text-sm">{item.name}</span>
                         <div className="flex items-center gap-4">
-                          <span>${(item.price * item.quantity).toFixed(2)}</span>
+                          <span className="text-teal-700">₹{(item.price * item.quantity).toFixed(2)}</span>
                           <div className="flex items-center gap-2">
                             <Button
                               size="sm"
                               variant="outline"
+                              className="border-teal-200"
                               onClick={() => {
                                 setCart(prevCart =>
                                   prevCart.map(cartItem =>
@@ -332,6 +540,7 @@ const BuyMedicine: React.FC = () => {
                             <Button
                               size="sm"
                               variant="outline"
+                              className="border-teal-200"
                               onClick={() => {
                                 setCart(prevCart =>
                                   prevCart.map(cartItem =>
@@ -348,21 +557,23 @@ const BuyMedicine: React.FC = () => {
                         </div>
                       </div>
                     ))}
-                    <div className="border-t pt-4">
-                      <div className="flex justify-between mb-2">
+                    <div className="border-t border-teal-100 pt-4">
+                      <div className="flex justify-between mb-2 text-sm">
                         <span>Subtotal</span>
-                        <span>${calculateTotal().subtotal.toFixed(2)}</span>
+                        <span>₹{calculateTotal().subtotal.toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between mb-2">
-                        <span>Delivery Fee</span>
-                        <span>${calculateTotal().deliveryFee.toFixed(2)}</span>
+                      <div className="flex justify-between mb-2 text-sm">
+                        <span>Delivery Fee {calculateTotal().subtotal > 399 && '(Free!)'}</span>
+                        <span>₹{calculateTotal().deliveryFee.toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between font-bold">
+                      <div className="flex justify-between font-bold text-teal-700">
                         <span>Total</span>
-                        <span>${calculateTotal().total.toFixed(2)}</span>
+                        <span>₹{calculateTotal().total.toFixed(2)}</span>
                       </div>
                     </div>
-                    <Button className="w-full">Proceed to Checkout</Button>
+                    <Button className="w-full bg-teal-600 hover:bg-teal-700">
+                      Proceed to Checkout
+                    </Button>
                   </div>
                 )}
               </CardContent>
@@ -383,7 +594,7 @@ const BuyMedicine: React.FC = () => {
                 onClick={scrollToCart}
                 className="bg-teal-600 hover:bg-teal-700 rounded-full p-4 shadow-lg"
               >
-                <ShoppingCart className="h-6 w-6" />
+                <ShoppingCart className="h-5 w-5" />
                 <span className="ml-2">{calculateTotal().itemCount}</span>
               </Button>
             </motion.div>
@@ -392,7 +603,7 @@ const BuyMedicine: React.FC = () => {
 
         {/* Cart Added Toast */}
         <AnimatePresence>
-          {showCartToast && (
+          {showCartToast && addedItem && (
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -401,25 +612,44 @@ const BuyMedicine: React.FC = () => {
             >
               <Toast className="bg-teal-600 text-white px-6 py-3 rounded-lg shadow-lg">
                 <div className="flex items-center gap-2">
-                  <ShoppingCart className="h-5 w-5" />
-                  <span>Item added to cart successfully!</span>
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>Added {addedItem.name} to cart!</span>
                 </div>
               </Toast>
             </motion.div>
           )}
         </AnimatePresence>
 
+        {/* Confirmation Message */}
+        <AnimatePresence>
+          {showConfirmation && (
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              className="fixed top-4 right-4 z-50"
+            >
+              <Alert className="bg-green-50 border-green-200">
+                <AlertCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-700">
+                  Medicine successfully added to cart!
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Prescription Alert */}
         {showPrescriptionAlert && (
-          <Alert className="fixed top-4 right-4 z-50">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="fixed top-4 right-4 z-50 bg-teal-50 border-teal-200">
+            <AlertCircle className="h-4 w-4 text-teal-600" />
+            <AlertDescription className="text-teal-700">
               Please upload a prescription before adding this medicine to cart
             </AlertDescription>
             <Button
               size="sm"
               variant="ghost"
-              className="ml-2"
+              className="ml-2 text-teal-600 hover:text-teal-700"
               onClick={() => setShowPrescriptionAlert(false)}
             >
               <X className="h-4 w-4" />

@@ -1,10 +1,10 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, User, Search, Filter, X } from 'lucide-react';
+import { Calendar, Clock, MapPin, Search, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,9 +21,11 @@ interface Appointment {
   doctorName: string;
   specialty: string;
   date: string;
-  time: string;
+  startTime: string;
+  endTime: string;
   location: string;
   status: 'upcoming' | 'completed' | 'cancelled';
+  meetingType: 'online' | 'offline';
 }
 
 const AppointmentComponent: React.FC = () => {
@@ -37,36 +39,44 @@ const AppointmentComponent: React.FC = () => {
       doctorName: 'Dr. Sarah Johnson',
       specialty: 'Cardiologist',
       date: '2024-02-15',
-      time: '10:00 AM',
+      startTime: '10:00 AM',
+      endTime: '11:00 AM',
       location: 'Health Center Main Branch',
-      status: 'upcoming'
+      status: 'upcoming',
+      meetingType: 'online'
     },
     {
       id: '2', 
       doctorName: 'Dr. Michael Chen',
       specialty: 'Dermatologist',
       date: '2024-02-20',
-      time: '2:30 PM',
+      startTime: '2:30 PM',
+      endTime: '3:30 PM',
       location: 'Downtown Clinic',
-      status: 'upcoming'
+      status: 'upcoming',
+      meetingType: 'offline'
     },
     {
       id: '3',
       doctorName: 'Dr. Emily Brown',
       specialty: 'Pediatrician',
       date: '2024-01-30',
-      time: '3:45 PM',
+      startTime: '3:45 PM',
+      endTime: '4:45 PM',
       location: 'Children\'s Medical Center',
-      status: 'completed'
+      status: 'completed',
+      meetingType: 'online'
     },
     {
       id: '4',
       doctorName: 'Dr. James Wilson',
       specialty: 'Orthopedist',
       date: '2024-02-10',
-      time: '11:30 AM',
+      startTime: '11:30 AM',
+      endTime: '12:30 PM',
       location: 'Sports Medicine Clinic',
-      status: 'cancelled'
+      status: 'cancelled',
+      meetingType: 'offline'
     }
   ]);
 
@@ -87,21 +97,23 @@ const AppointmentComponent: React.FC = () => {
     }
   };
 
-  const filteredAppointments = appointments
-    .filter(appointment => 
-      filterStatus === 'all' ? true : appointment.status === filterStatus
-    )
-    .filter(appointment =>
-      appointment.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      appointment.specialty.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const filteredAppointments = useMemo(() => {
+    return appointments
+      .filter(appointment => 
+        filterStatus === 'all' ? true : appointment.status === filterStatus
+      )
+      .filter(appointment =>
+        appointment.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        appointment.specialty.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  }, [appointments, filterStatus, searchTerm]);
 
   const getStatusColor = (status: string) => {
     switch(status) {
       case 'upcoming':
         return 'bg-teal-100 text-teal-800';
       case 'completed':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-teal-200 text-teal-800';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
       default:
@@ -110,9 +122,9 @@ const AppointmentComponent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50 to-white">
+    <div className="min-h-screen bg-indigo-100">
       {/* Header */}
-      <header className="bg-white shadow-md border-b border-teal-100">
+      <header className="bg-white shadow-md border-b border-teal-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -123,7 +135,7 @@ const AppointmentComponent: React.FC = () => {
                 height={40}
                 className="mr-3"
               />
-              <h1 className="text-2xl font-bold text-teal-700">HealthCare Hub</h1>
+              <h1 className="text-2xl font-bold text-teal-700">Medico Hub</h1>
             </div>
             <Link href="/appointment/finddoctor">
               <Button
@@ -144,13 +156,13 @@ const AppointmentComponent: React.FC = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-teal-500 w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search doctor or specialty"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-teal-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 w-full sm:w-64"
+                  className="pl-10 pr-4 py-2 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 w-full sm:w-64"
                 />
                 {searchTerm && (
                   <button
@@ -158,7 +170,7 @@ const AppointmentComponent: React.FC = () => {
                     onClick={() => setSearchTerm('')}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   >
-                    <X className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                    <X className="w-4 h-4 text-teal-500 hover:text-teal-700" />
                   </button>
                 )}
               </div>
@@ -167,7 +179,7 @@ const AppointmentComponent: React.FC = () => {
                 title="Filter by status"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="px-4 py-2 border border-teal-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+                className="px-4 py-2 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
               >
                 <option value="all">All Status</option>
                 <option value="upcoming">Upcoming</option>
@@ -178,53 +190,72 @@ const AppointmentComponent: React.FC = () => {
           </div>
           
           {filteredAppointments.length === 0 ? (
-            <Card className="bg-white p-8 text-center shadow-sm border border-teal-100">
-              <p className="text-gray-500">No appointments found</p>
+            <Card className="bg-teal-50 p-8 text-center shadow-sm border border-teal-200">
+              <p className="text-teal-700">No appointments found</p>
             </Card>
           ) : (
             <div className="grid gap-6 md:grid-cols-2">
               {filteredAppointments.map((appointment) => (
-                <Card key={appointment.id} className="bg-white hover:shadow-lg transition-shadow duration-200 border border-teal-100">
-                  <CardHeader className="border-b bg-teal-50">
+                <Card key={appointment.id} className="bg-white hover:shadow-lg transition-shadow duration-200 border border-teal-200">
+                  <CardHeader className="border-b bg-teal-100">
                     <div className="flex justify-between items-center">
                       <h3 className="font-semibold text-teal-700">{appointment.doctorName}</h3>
-                      <span className="text-sm font-medium text-teal-600 bg-teal-100 px-3 py-1 rounded-full">
+                      <span className="text-sm font-medium text-teal-600 bg-teal-200 px-3 py-1 rounded-full">
                         {appointment.specialty}
                       </span>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-4">
                     <div className="space-y-3">
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-teal-700">
                         <Calendar className="w-4 h-4 mr-2 text-teal-600" />
                         <span>{appointment.date}</span>
                       </div>
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-teal-700">
                         <Clock className="w-4 h-4 mr-2 text-teal-600" />
-                        <span>{appointment.time}</span>
+                        <span>{appointment.startTime} - {appointment.endTime}</span>
                       </div>
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-teal-700">
                         <MapPin className="w-4 h-4 mr-2 text-teal-600" />
                         <span>{appointment.location}</span>
                       </div>
+                      <div className="flex items-center text-teal-700">
+                        <span className="w-4 h-4 mr-2">
+                          {appointment.meetingType === 'online' ? '💻' : '📍'}
+                        </span>
+                        <span>{appointment.meetingType.charAt(0).toUpperCase() + appointment.meetingType.slice(1)} Meeting</span>
+                      </div>
                     </div>
                   </CardContent>
-                  <CardFooter className="border-t bg-gray-50 p-4">
+                  <CardFooter className="border-t bg-teal-50 p-4">
                     <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-3">
                       <span className={`text-sm font-medium px-3 py-1 rounded-full ${getStatusColor(appointment.status)}`}>
                         {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                       </span>
                       <div className="flex gap-3">
-                        <Link href={`/appointments/${appointment.id}`}>
-                          <Button variant="outline" size="sm" className="text-teal-600 hover:bg-teal-50 border-teal-200">
-                            View Details
+                        {appointment.status !== 'completed' && (
+                          <Link href={`/appointments/${appointment.id}`}>
+                            <Button variant="outline" size="sm" className="text-teal-600 hover:bg-teal-100 border-teal-300">
+                              View Details
+                            </Button>
+                          </Link>
+                        )}
+                        {appointment.meetingType === 'online' && (
+                          <Button 
+                            variant="default" 
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            onClick={() => {/* Add start meeting functionality here */}}
+                            disabled={appointment.status === 'completed'}
+                          >
+                            Start Meeting
                           </Button>
-                        </Link>
+                        )}
                         {appointment.status === 'upcoming' && (
                           <Button 
                             variant="outline" 
                             size="sm"
-                            className="text-red-600 hover:bg-red-50 border-red-200"
+                            className="text-red-600 hover:bg-red-100 border-red-300"
                             onClick={() => handleCancelClick(appointment.id)}
                           >
                             Cancel
