@@ -14,6 +14,7 @@ import { UpperNavbar } from "@/components/UpperNavbar";
 import Health from "@/components/HealthcareLanding";
 import Footer from "@/components/Footer";
 import NotAuthenticated from "@/components/NotAuthenticated";
+import ChatRoomButton from "@/components/ChatRoomButton";
 
 
 export default function Home() {
@@ -23,6 +24,7 @@ export default function Home() {
      <LoginButton />
       <Health />
       <Dive />
+      <ChatRoomButton />
       <EmergencyButton />
       {/* <Dashboard /> */}
       {/* <DoctorShowcase /> */}

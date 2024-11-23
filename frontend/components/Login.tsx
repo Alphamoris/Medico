@@ -1,13 +1,12 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { LogIn, Lock, Mail, Eye, EyeOff, Sparkles } from "lucide-react";
+import { LogIn, Lock, Mail, Eye, EyeOff, Sparkles, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { login } from "@/apilib/ApiAuthenticate";
 import { LoginFormData } from "@/interface";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export default function OptimizedLogin() {
     const router = useRouter();
@@ -17,6 +16,8 @@ export default function OptimizedLogin() {
     });
     const [isPasswordVisible, setPasswordVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -24,24 +25,61 @@ export default function OptimizedLogin() {
             ...prev,
             [name]: value
         }));
+        // Clear error when user starts typing
+        if (error) setError(null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError(null);
         
         try {
             const response = await login(formData);
-            console.log(`Login Successful :  `, response);
-            toast.success("Successfully logged in!");
-            router.push("/");
+            if (!response || !response.access_token) {
+                setError("Invalid email or password. Please try again.");
+                return;
+            }
+            setShowSuccess(true);
+            setTimeout(() => {
+                router.push("/");
+            }, 2000);
         } catch (error) {
-            console.error("Login Failed:", error);
-            toast.error("Login failed. Please try again.");
+            setError("Invalid email or password. Please try again.");
         } finally {
             setIsLoading(false);
         }
     };
+
+    if (showSuccess) {
+        return (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="fixed inset-0 bg-gradient-to-br from-[#1a2980] via-[#26d0ce] to-[#1a2980] flex items-center justify-center"
+            >
+                <motion.div 
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", duration: 0.5 }}
+                    className="text-center text-white"
+                >
+                    <motion.div
+                        animate={{ 
+                            scale: [1, 1.2, 1],
+                            rotate: [0, 360]
+                        }}
+                        transition={{ duration: 1 }}
+                        className="mb-6"
+                    >
+                        <Sparkles size={64} />
+                    </motion.div>
+                    <h1 className="text-4xl font-bold mb-4">Successfully Logged In!</h1>
+                    <p className="text-xl opacity-80">Redirecting to homepage...</p>
+                </motion.div>
+            </motion.div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#1a2980] via-[#26d0ce] to-[#1a2980] flex items-center justify-center p-4 overflow-hidden">
@@ -125,6 +163,21 @@ export default function OptimizedLogin() {
                             Sign in to continue your journey
                         </motion.p>
                     </div>
+
+                    {/* Error Message */}
+                    <AnimatePresence>
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="mb-4 p-3 bg-red-400 border border-red-500/50 rounded-lg flex items-center gap-2 text-white"
+                            >
+                                <AlertCircle size={20} />
+                                <span>{error}</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* Login Form */}
                     <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">

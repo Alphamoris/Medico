@@ -1,4 +1,4 @@
-import NotAuthenticated from "@/components/NotAuthenticated";
+
 import ProfileComponent from "@/components/Profile";
 
 

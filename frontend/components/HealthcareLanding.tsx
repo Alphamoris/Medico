@@ -7,6 +7,7 @@ import { FaUserNurse } from "react-icons/fa";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { Input } from './ui/input';
 
 // Types
 interface TestimonialProps {
@@ -287,7 +288,7 @@ const HealthcareLanding: React.FC = () => {
               />
                 <Badge className="mt-14 mb-2 px-4 text-center py-2 bg-gradient-to-r from-teal-100 to-blue-100 text-teal-800 hover:from-teal-200 hover:to-blue-200 transition-all duration-300">
                   <Sparkles className="w-4 h-4 inline-block mr-2" />
-                  Leading Healthcare Innovation
+                  Dhanush's Website
                 </Badge>
                 <motion.h1
                   initial={{ opacity: 0, y: 20 }}
@@ -477,6 +478,25 @@ const HealthcareLanding: React.FC = () => {
               </form>
             </div>
           </section>
+          {/* {NewsletterSection} */}
+          <div className="w-full max-w-4xl mx-auto mb-10 bg-transparent rounded-2xl p-8 shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Stay Updated with Health Tips</h2>
+            <p className="text-gray-600">Subscribe to our newsletter for the latest healthcare insights</p>
+          </div>
+          <div className="flex flex-col justify-center sm:flex-row gap-4">
+            <Input 
+              type="email" 
+              placeholder="Enter your email" 
+              className="flex-grow"
+            />
+            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+              Subscribe
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
 
           {/* CTA Section */}
           <section className="py-20 px-4 sm:px-6 lg:px-8">

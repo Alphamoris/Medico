@@ -16,6 +16,7 @@ export const Signup: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [passwordStrength, setPasswordStrength] = useState<{
     score: number;
@@ -76,9 +77,12 @@ export const Signup: React.FC = () => {
     
     setIsLoading(true);
     try {
+      console.log(formData);
       const response = await signup(formData);
-      toast.success("Account created successfully!");
-      router.push('/');
+      setShowSuccess(true);
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
     } catch(error) {
       toast.error("Failed to create account. Please try again.");
       console.log(error);
@@ -135,6 +139,50 @@ export const Signup: React.FC = () => {
   const prevStep = () => {
     if (currentStep > 1) setCurrentStep(prev => prev - 1);
   };
+
+  if (showSuccess) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center z-50"
+      >
+        <div className="text-center text-white p-8">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", duration: 0.5 }}
+          >
+            <div className="w-24 h-24 bg-white rounded-full mx-auto mb-6 flex items-center justify-center">
+              <Image
+                src="/logo.ico"
+                alt="Medico Logo"
+                width={60}
+                height={60}
+                className="rounded-full"
+              />
+            </div>
+          </motion.div>
+          <motion.h2 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-4xl font-bold mb-4"
+          >
+            Welcome to Medico!
+          </motion.h2>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-xl text-teal-100"
+          >
+            Your account has been created successfully.
+          </motion.p>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex flex-col lg:flex-row bg-gradient-to-br from-indigo-50 via-white to-teal-50">

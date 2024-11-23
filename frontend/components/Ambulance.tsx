@@ -227,7 +227,7 @@ const EmergencyButton: React.FC = () => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-3 z-48 group bg-gradient-to-r from-red-500 to-red-600 
+        className="fixed bottom-20 right-3 z-48 group bg-gradient-to-r from-red-500 to-red-600 
                  text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 
                  transform hover:scale-105 focus:outline-none focus:ring-2 
                  focus:ring-red-500 focus:ring-offset-2"

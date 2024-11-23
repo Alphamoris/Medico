@@ -91,7 +91,7 @@ const Dive = () => {
   // Floating button and greeting when chat is closed
   if (!isOpen) {
     return (
-      <div className="fixed bottom-20 right-3 flex flex-col items-end z-49">
+      <div className="fixed bottom-32 right-3 flex flex-col items-end z-49">
         {/* Greeting Message */}
         <div className={`
           transform transition-all duration-500 mb-2

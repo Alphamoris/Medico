@@ -49,31 +49,12 @@ const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="relative w-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pt-8 pb-4 overflow-x-hidden">
+    <footer className="relative w-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pt-8 pb-4 overflow-y-hidden overflow-x-hidden z-0">
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-blue-200 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute top-1/2 right-0 w-96 h-96 bg-purple-200 rounded-full filter blur-3xl opacity-20 translate-x-1/2 -translate-y-1/2" />
       
       <div className="container mx-auto px-4 relative">
-        {/* Newsletter Section */}
-        <div className="w-full max-w-4xl mx-auto mb-10 bg-white rounded-2xl p-8 shadow-lg transform hover:-translate-y-1 transition-all duration-300">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Stay Updated with Health Tips</h2>
-            <p className="text-gray-600">Subscribe to our newsletter for the latest healthcare insights</p>
-          </div>
-          <div className="flex flex-col justify-center sm:flex-row gap-4">
-            <Input 
-              type="email" 
-              placeholder="Enter your email" 
-              className="flex-grow"
-            />
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
-              Subscribe
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Section */}
           <div className="space-y-6">
