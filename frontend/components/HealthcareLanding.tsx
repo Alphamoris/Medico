@@ -53,7 +53,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ end, duration = 3, pr
 
 // Enhanced Floating Icons with Performance Optimization
 const FloatingIcons: React.FC = () => {
-  const icons = [HeartPulse, FaUserNurse , BiPlusMedical , Brain, Shield, Activity, Stethoscope ];
+  const icons = [HeartPulse, Users, FaUserNurse , BiPlusMedical , Brain, Shield, Activity, Stethoscope ];
   
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -73,7 +73,7 @@ const FloatingIcons: React.FC = () => {
             scale: [1, 1.2, 1]
           }}
           transition={{
-            duration: 15 + Math.random() * 10,
+            duration: 10 + Math.random() * 10,
             repeat: Infinity,
             repeatType: "reverse"
           }}

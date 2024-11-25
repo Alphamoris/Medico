@@ -7,9 +7,15 @@ import Image from "next/image";
 import { login } from "@/apilib/ApiAuthenticate";
 import { LoginFormData } from "@/interface";
 import { useRouter } from "next/navigation";
+//import { setIsLoggedIn } from "@/Redux/Slice";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+
 
 export default function OptimizedLogin() {
     const router = useRouter();
+    const dispatch = useDispatch()
+    const IsLoggedIn = useSelector((state : any ) => state.login)
     const [formData, setFormData] = useState<LoginFormData>({
         email: "",
         password: ""
@@ -41,6 +47,7 @@ export default function OptimizedLogin() {
                 return;
             }
             setShowSuccess(true);
+            //dispatch(setIsLoggedIn(true))
             setTimeout(() => {
                 router.push("/");
             }, 2000);

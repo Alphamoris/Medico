@@ -1,9 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-    customers: [],
-};
-
 const customersSlice = createSlice({
     name: "customers",
     initialState: {
@@ -17,4 +13,5 @@ const customersSlice = createSlice({
 });
 
 export const { setCustomers } = customersSlice.actions;
+export const selectCustomers = (state: any) => state.customers.customers;
 export default customersSlice.reducer;

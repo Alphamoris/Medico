@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Create a custom Axios instance
 const apiInstance = axios.create({
-    baseURL: 'http://127.0.0.1:8000/authenticate',
+    baseURL: 'http://127.0.0.1:8000',
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',

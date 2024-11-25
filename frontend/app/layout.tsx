@@ -29,8 +29,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {isExcluded ? children : (
             <>
               {children}
-              <LowerNavbar />
-              <Footer />
+              {/* <LowerNavbar /> */}
+              {/* <Footer /> */}
             </>
           )}
         </Provider>

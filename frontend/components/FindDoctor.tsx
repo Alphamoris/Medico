@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { 
   Star,
   Calendar,
@@ -30,6 +30,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format, addDays, isSameDay } from 'date-fns';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
+import { getDoctors } from '@/apilib/ApiGet';
 
 const FindDoctor = () => {
   const [selectedSpeciality, setSelectedSpeciality] = useState('All');
@@ -45,94 +46,72 @@ const FindDoctor = () => {
   const [bookingStep, setBookingStep] = useState(1);
   const [patientNotes, setPatientNotes] = useState('');
   const [consultationType, setConsultationType] = useState<'video' | 'in-person'>('in-person');
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
 
-  // Memoize the notes change handler
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const data = await getDoctors();
+        
+        // Transform the API data to match our interface
+        const transformedData = data.map((doc: any) => ({
+          id: doc.id,
+          name: doc.name,
+          speciality: doc.speciality,
+          rating: doc.rating,
+          reviews: doc.reviews,
+          experience: doc.experience,
+          image: doc.image,
+          nextAvailable: doc.next_available,
+          location: doc.location,
+          patients: doc.patients,
+          education: doc.education,
+          languages: doc.languages.map((lang: string) => ({ 
+            id: lang.toLowerCase(),
+            name: lang 
+          })),
+          consultationFee: doc.consultation_fee,
+          availability: doc.availability,
+          verified: doc.verified,
+          awards: doc.awards,
+          bio: doc.bio,
+          timeSlots: {
+            morning: doc.time_slots
+              .filter((time: string) => parseInt(time) < 12)
+              .map((time: string) => ({
+                time,
+                available: true
+              })),
+            evening: doc.time_slots
+              .filter((time: string) => parseInt(time) >= 12)
+              .map((time: string) => ({
+                time,
+                available: true
+              }))
+          },
+          specializations: doc.specializations,
+          insuranceAccepted: doc.insurance_accepted,
+          hospitalAffiliations: doc.hospital_affiliations
+        }));
+
+        setDoctors(transformedData);
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+        toast.error('Failed to fetch doctors data');
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
   const handleNotesChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPatientNotes(e.target.value);
   }, []);
 
-  // Memoize next 14 days calculation
   const nextFourteenDays = useMemo(() => 
     Array.from({length: 14}, (_, i) => addDays(new Date(), i)),
     []
   );
-
-  const doctors = useMemo(() => [
-    {
-      id: 1,
-      name: "Dr. Sarah Johnson",
-      speciality: "Cardiologist",
-      rating: 4.8,
-      reviews: 125,
-      experience: "15 years",
-      image: "/doctors/doctor1.jpg",
-      nextAvailable: "Today",
-      location: "New York Medical Center",
-      patients: "2000+",
-      education: "MD - Cardiology, MBBS",
-      languages: [
-        { id: "en", name: "English" },
-        { id: "es", name: "Spanish" }
-      ],
-      consultationFee: 1500,
-      availability: ["Mon", "Wed", "Fri"],
-      verified: true,
-      awards: 3,
-      bio: "Experienced cardiologist specializing in preventive cardiology and heart disease management.",
-      timeSlots: {
-        morning: [
-          { time: "09:00", available: true },
-          { time: "10:00", available: false },
-          { time: "11:00", available: true }
-        ],
-        evening: [
-          { time: "16:00", available: true },
-          { time: "17:00", available: true },
-          { time: "18:00", available: false }
-        ]
-      },
-      specializations: ["Interventional Cardiology", "Heart Failure"],
-      insuranceAccepted: ["Blue Cross", "Aetna", "Cigna"],
-      hospitalAffiliations: ["New York Medical Center", "City Hospital"]
-    },
-    {
-      id: 2,
-      name: "Dr. Michael Chen",
-      speciality: "Orthopedic Surgeon", 
-      rating: 4.9,
-      reviews: 180,
-      experience: "12 years",
-      image: "/doctors/doctor2.jpg",
-      nextAvailable: "Tomorrow",
-      location: "City Hospital",
-      patients: "1500+",
-      education: "MD - Orthopedics, MBBS",
-      languages: [
-        { id: "en", name: "English" },
-        { id: "zh", name: "Chinese" }
-      ],
-      consultationFee: 2000,
-      availability: ["Tue", "Thu", "Sat"],
-      verified: true,
-      awards: 2,
-      bio: "Specialized in joint replacement surgery and sports medicine.",
-      timeSlots: {
-        morning: [
-          { time: "09:30", available: true },
-          { time: "10:30", available: true },
-          { time: "11:30", available: false }
-        ],
-        evening: [
-          { time: "15:30", available: false },
-          { time: "16:30", available: true },
-          { time: "17:30", available: true }
-        ]
-      },
-      specializations: ["Joint Replacement", "Sports Medicine"],
-      insuranceAccepted: ["United Healthcare", "Aetna"],
-      hospitalAffiliations: ["City Hospital", "Sports Medicine Center"]
-    }
-  ], []);
 
   interface Doctor {
     id: number;
@@ -661,3 +640,25 @@ const FindDoctor = () => {
 };
 
 export default FindDoctor;
+
+
+// INSERT INTO doctors (name, speciality, rating, reviews, experience, image, next_available, location, patients, education, languages, consultation_fee, availability, verified, awards, bio, time_slots, specializations, insurance_accepted, hospital_affiliations) VALUES
+// ('Dr. Benjamin Foster', 'Cardiologist', 4.9, 425, '22 years', '/logo.ico', 'Today', 'Cleveland Clinic', '5000+', 'MD - Cardiology, Yale School of Medicine', ARRAY['English', 'German'], 450.00, ARRAY['Mon', 'Wed', 'Thu'], true, 8, 'Pioneer in advanced cardiac imaging and minimally invasive procedures. Former Chief of Cardiology at Mayo Clinic.', ARRAY['08:00', '10:00', '14:00', '16:00'], ARRAY['Interventional Cardiology', 'Advanced Heart Failure', 'Cardiac Imaging'], ARRAY['Blue Cross', 'Aetna', 'United Healthcare', 'Cigna'], ARRAY['Cleveland Clinic', 'Johns Hopkins']),
+
+// ('Dr. Alexandra Chen', 'Neurologist', 4.95, 380, '20 years', '/logo.ico', 'Tomorrow', 'Massachusetts General Hospital', '4500+', 'MD - Neurology, Harvard Medical School', ARRAY['English', 'Mandarin', 'French'], 500.00, ARRAY['Tue', 'Thu', 'Fri'], true, 6, 'Leading researcher in neurodegenerative diseases. Published over 100 peer-reviewed papers.', ARRAY['09:00', '11:00', '15:00', '17:00'], ARRAY['Movement Disorders', 'Neurodegenerative Diseases', 'Neuro-oncology'], ARRAY['Blue Shield', 'Medicare', 'Humana'], ARRAY['Mass General', 'Brigham and Women''s Hospital']),
+
+// ('Dr. Victoria Reynolds', 'Pediatrician', 4.9, 520, '18 years', '/logo.ico', 'Today', 'Boston Children''s Hospital', '6000+', 'MD - Pediatrics, Stanford University', ARRAY['English', 'Spanish'], 350.00, ARRAY['Mon', 'Tue', 'Wed', 'Fri'], true, 5, 'Specializes in pediatric developmental disorders. Former president of American Academy of Pediatrics.', ARRAY['08:30', '10:30', '14:30', '16:30'], ARRAY['Developmental Pediatrics', 'Behavioral Health', 'Chronic Disease Management'], ARRAY['Aetna', 'United Healthcare', 'Cigna'], ARRAY['Boston Children''s Hospital', 'Dana-Farber Cancer Institute']),
+
+// ('Dr. Richard Martinez', 'Orthopedic', 4.95, 450, '25 years', '/logo.ico', 'Next Week', 'Hospital for Special Surgery', '4800+', 'MD - Orthopedic Surgery, Johns Hopkins', ARRAY['English', 'Spanish'], 600.00, ARRAY['Mon', 'Wed', 'Thu'], true, 7, 'Pioneering surgeon in joint replacement. Team physician for multiple professional sports teams.', ARRAY['07:30', '09:30', '13:30', '15:30'], ARRAY['Sports Medicine', 'Joint Replacement', 'Spine Surgery'], ARRAY['Blue Cross', 'Cigna', 'Oxford'], ARRAY['HSS', 'NewYork-Presbyterian']),
+
+// ('Dr. Sarah Thompson', 'Dermatologist', 4.85, 390, '16 years', '/logo.ico', 'Tomorrow', 'Stanford Dermatology Center', '3500+', 'MD - Dermatology, University of Pennsylvania', ARRAY['English'], 400.00, ARRAY['Tue', 'Thu', 'Fri'], true, 4, 'Leading expert in melanoma treatment and cosmetic dermatology. NIH-funded researcher.', ARRAY['09:00', '11:00', '14:00', '16:00'], ARRAY['Skin Cancer', 'Cosmetic Dermatology', 'Laser Surgery'], ARRAY['Aetna', 'Blue Shield', 'United Healthcare'], ARRAY['Stanford Hospital', 'UCSF Medical Center']),
+
+// ('Dr. James Harrison', 'Cardiologist', 4.9, 480, '24 years', '/logo.ico', 'Today', 'Mount Sinai Heart', '5500+', 'MD - Cardiology, Columbia University', ARRAY['English', 'Italian'], 475.00, ARRAY['Mon', 'Wed', 'Fri'], true, 9, 'Renowned expert in structural heart disease. Pioneer in TAVR procedures.', ARRAY['08:00', '10:00', '13:00', '15:00'], ARRAY['Structural Heart Disease', 'Interventional Cardiology', 'Heart Failure'], ARRAY['Empire', 'United Healthcare', 'Aetna'], ARRAY['Mount Sinai', 'NYU Langone']),
+
+// ('Dr. Michelle Park', 'Neurologist', 4.85, 360, '19 years', '/logo.ico', 'Tomorrow', 'UCSF Medical Center', '4000+', 'MD - Neurology, Stanford University', ARRAY['English', 'Korean'], 450.00, ARRAY['Tue', 'Thu', 'Fri'], true, 5, 'Specializes in multiple sclerosis and neuroimmunology. Leading clinical researcher.', ARRAY['09:30', '11:30', '14:30', '16:30'], ARRAY['Multiple Sclerosis', 'Neuroimmunology', 'Headache Medicine'], ARRAY['Blue Shield', 'Anthem', 'United Healthcare'], ARRAY['UCSF Medical Center', 'Stanford Hospital']),
+
+// ('Dr. Robert Williams', 'Orthopedic', 4.9, 410, '21 years', '/logo.ico', 'Next Week', 'Mayo Clinic', '4200+', 'MD - Orthopedic Surgery, Duke University', ARRAY['English'], 550.00, ARRAY['Mon', 'Tue', 'Thu'], true, 6, 'Internationally recognized spine surgeon. Developer of minimally invasive techniques.', ARRAY['08:00', '10:00', '14:00', '16:00'], ARRAY['Spine Surgery', 'Minimally Invasive Surgery', 'Complex Reconstruction'], ARRAY['Blue Cross', 'United Healthcare', 'Medica'], ARRAY['Mayo Clinic', 'Methodist Hospital']),
+
+// ('Dr. Emily Anderson', 'Pediatrician', 4.95, 490, '17 years', '/logo.ico', 'Today', 'Nationwide Children''s Hospital', '5800+', 'MD - Pediatrics, Washington University', ARRAY['English', 'French'], 375.00, ARRAY['Mon', 'Wed', 'Thu', 'Fri'], true, 4, 'Expert in pediatric critical care. Published author on childhood development.', ARRAY['08:30', '10:30', '13:30', '15:30'], ARRAY['Critical Care', 'Neonatal Care', 'Emergency Medicine'], ARRAY['Anthem', 'United Healthcare', 'Cigna'], ARRAY['Nationwide Children''s', 'Ohio State Medical Center']),
+
+// ('Dr. Daniel Kim', 'Dermatologist', 4.9, 370, '18 years', '/logo.ico', 'Tomorrow', 'UCLA Dermatology', '3800+', 'MD - Dermatology, Harvard Medical School', ARRAY['English', 'Korean', 'Spanish'], 425.00, ARRAY['Tue', 'Wed', 'Fri'], true, 5, 'Leading authority in ethnic skin care and advanced laser treatments. UCLA Clinical Professor.', ARRAY['09:00', '11:00', '14:00', '16:00'], ARRAY['Cosmetic Dermatology', 'Laser Surgery', 'Ethnic Skin Care'], ARRAY['Blue Shield', 'Cigna', 'Kaiser'], ARRAY['UCLA Medical Center', 'Cedars-Sinai']);

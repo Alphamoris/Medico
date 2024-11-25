@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Video, Mic, MessageSquare, X, Users, Share2, Settings, Shield, Wifi, Clock, Users2, AlertTriangle } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface Room {
   id: string;
@@ -17,6 +18,7 @@ interface Room {
 }
 
 const ChatRoom: React.FC = () => {
+  const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
@@ -120,7 +122,8 @@ const ChatRoom: React.FC = () => {
     }
 
     // Websocket connection and room joining logic will be implemented here
-    console.log(`Joining room with code: ${joinCode}`);
+    console.log(`Joining room with code: ${room.id}`);
+    router.push(`/websockets/${room.id}`);
   };
 
   const handleDiscardRoom = (roomId: string) => {

@@ -20,8 +20,8 @@ import ChatRoomButton from "@/components/ChatRoomButton";
 export default function Home() {
   return (
     <>
-     <UpperNavbar />
-     <LoginButton />
+      <UpperNavbar />
+      <LoginButton />
       <Health />
       <Dive />
       <ChatRoomButton />

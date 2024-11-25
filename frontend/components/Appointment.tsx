@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Search, X } from 'lucide-react';
+import { Calendar, Clock, MapPin , Search, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useRouter } from 'next/navigation'; // Changed to useRouter from 'next/navigation'
 
 interface Appointment {
   id: string;
@@ -26,9 +27,13 @@ interface Appointment {
   location: string;
   status: 'upcoming' | 'completed' | 'cancelled';
   meetingType: 'online' | 'offline';
+  roomCode?: string;
+  roomPassword?: string;
 }
 
 const AppointmentComponent: React.FC = () => {
+  
+  const router = useRouter(); // Changed from Router() to useRouter()
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'upcoming' | 'completed' | 'cancelled'>('all');
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -43,7 +48,9 @@ const AppointmentComponent: React.FC = () => {
       endTime: '11:00 AM',
       location: 'Health Center Main Branch',
       status: 'upcoming',
-      meetingType: 'online'
+      meetingType: 'online',
+      roomCode: '845345',
+      roomPassword: 'doctor@45'
     },
     {
       id: '2', 
@@ -65,7 +72,9 @@ const AppointmentComponent: React.FC = () => {
       endTime: '4:45 PM',
       location: 'Children\'s Medical Center',
       status: 'completed',
-      meetingType: 'online'
+      meetingType: 'online',
+      roomCode: '234456',
+      roomPassword: 'doc@34'
     },
     {
       id: '4',
@@ -224,6 +233,11 @@ const AppointmentComponent: React.FC = () => {
                           {appointment.meetingType === 'online' ? '💻' : '📍'}
                         </span>
                         <span>{appointment.meetingType.charAt(0).toUpperCase() + appointment.meetingType.slice(1)} Meeting</span>
+                        {appointment.meetingType === 'online' && appointment.roomCode && appointment.roomPassword && (
+                          <span className="ml-2 text-sm text-teal-600">
+                            (Room: {appointment.roomCode} | Password: {appointment.roomPassword})
+                          </span>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -245,10 +259,10 @@ const AppointmentComponent: React.FC = () => {
                             variant="default" 
                             size="sm"
                             className="bg-blue-600 hover:bg-blue-700 text-white"
-                            onClick={() => {/* Add start meeting functionality here */}}
+                            onClick={() => router.push("/chat")}
                             disabled={appointment.status === 'completed'}
                           >
-                            Start Meeting
+                            Join Meeting
                           </Button>
                         )}
                         {appointment.status === 'upcoming' && (

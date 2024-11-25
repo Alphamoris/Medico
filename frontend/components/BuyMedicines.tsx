@@ -32,9 +32,11 @@ import {
   Grid
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+import { getMedicines } from '@/apilib/ApiGet';
 
 // Types
-interface Medicine {
+export interface Medicine {
   id: number;
   name: string;
   price: number;
@@ -60,102 +62,6 @@ interface Category {
   icon: React.ReactNode;
 }
 
-// Enhanced dummy data
-const medicines: Record<string, Medicine[]> = {
-  all: [
-    {
-      id: 1,
-      name: 'Paracetamol 500mg',
-      price: 199,
-      category: 'Pain Relief',
-      stock: 50,
-      description: 'Fast-acting pain reliever for headaches and fever',
-      dosage: '1-2 tablets every 4-6 hours',
-      requires_prescription: false,
-      rating: 4.5,
-      reviews: 128,
-      discount: 10,
-      expiry: '2025-12',
-      manufacturer: 'PharmaCare Inc.'
-    },
-    {
-      id: 4,
-      name: 'Aspirin 75mg',
-      price: 299,
-      category: 'Blood Thinners',
-      stock: 40,
-      description: 'Daily blood thinner for cardiovascular health',
-      dosage: '1 tablet daily',
-      requires_prescription: true,
-      rating: 4.8,
-      reviews: 256,
-      manufacturer: 'HeartCare Pharmaceuticals'
-    },
-    {
-      id: 6,
-      name: 'Calcium + D3',
-      price: 399,
-      category: 'Supplements',
-      stock: 60,
-      description: 'Essential supplement for bone health',
-      dosage: '1 tablet twice daily',
-      requires_prescription: false,
-      rating: 4.6,
-      reviews: 189,
-      discount: 15,
-      manufacturer: 'BoneHealth Labs'
-    }
-  ],
-  general: [
-    {
-      id: 1,
-      name: 'Paracetamol 500mg',
-      price: 199,
-      category: 'Pain Relief',
-      stock: 50,
-      description: 'Fast-acting pain reliever for headaches and fever',
-      dosage: '1-2 tablets every 4-6 hours',
-      requires_prescription: false,
-      rating: 4.5,
-      reviews: 128,
-      discount: 10,
-      expiry: '2025-12',
-      manufacturer: 'PharmaCare Inc.'
-    },
-  ],
-  cardiology: [
-    {
-      id: 4,
-      name: 'Aspirin 75mg',
-      price: 299,
-      category: 'Blood Thinners',
-      stock: 40,
-      description: 'Daily blood thinner for cardiovascular health',
-      dosage: '1 tablet daily',
-      requires_prescription: true,
-      rating: 4.8,
-      reviews: 256,
-      manufacturer: 'HeartCare Pharmaceuticals'
-    },
-  ],
-  orthopedic: [
-    {
-      id: 6,
-      name: 'Calcium + D3',
-      price: 399,
-      category: 'Supplements',
-      stock: 60,
-      description: 'Essential supplement for bone health',
-      dosage: '1 tablet twice daily',
-      requires_prescription: false,
-      rating: 4.6,
-      reviews: 189,
-      discount: 15,
-      manufacturer: 'BoneHealth Labs'
-    },
-  ]
-};
-
 const categories: Category[] = [
   { id: 'all', name: 'All', icon: <Grid className="h-4 w-4" /> },
   { id: 'general', name: 'General', icon: <Package className="h-4 w-4" /> },
@@ -175,9 +81,53 @@ const BuyMedicine: React.FC = () => {
   const [addedItem, setAddedItem] = useState<Medicine | null>(null);
   const [filterType, setFilterType] = useState<'all' | 'prescription' | 'otc'>('all');
   const [showConfirmation, setShowConfirmation] = useState(false);
-  
+  const [medicines, setMedicines] = useState<Record<string, Medicine[]>>({
+    all: [],
+    general: [],
+    cardiology: [],
+    orthopedic: []
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const cartRef = useRef<HTMLDivElement>(null);
   const observer = useRef<IntersectionObserver | null>(null);
+
+  // Fetch medicines data on component mount
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await getMedicines();
+        
+        // Categorize medicines
+        const categorizedMedicines = {
+          all: response,
+          general: response.filter((med: Medicine) => 
+            ['Pain Relief', 'Antibiotics', 'Antacids'].includes(med.category)
+          ),
+          cardiology: response.filter((med: Medicine) => 
+            ['Blood Thinners', 'Blood Pressure', 'Heart Health'].includes(med.category)
+          ),
+          orthopedic: response.filter((med: Medicine) => 
+            ['Supplements', 'Bone Health', 'Joint Pain'].includes(med.category)
+          )
+        };
+
+        setMedicines(categorizedMedicines);
+
+      } catch (err) {
+        setError('Failed to fetch medicines. Please try again later.');
+        console.error('Error fetching medicines:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMedicines();
+  }, []);
 
   useEffect(() => {
     observer.current = new IntersectionObserver(
@@ -240,7 +190,7 @@ const BuyMedicine: React.FC = () => {
       }
       return [...prevCart, { ...medicine, quantity: 1 }];
     });
-    
+
     setAddedItem(medicine);
     setShowCartToast(true);
     setShowConfirmation(true);
@@ -255,7 +205,7 @@ const BuyMedicine: React.FC = () => {
     return medicines[activeTab].filter(medicine => {
       const matchesSearch = medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         medicine.category.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       if (filterType === 'prescription') {
         return matchesSearch && medicine.requires_prescription;
       } else if (filterType === 'otc') {
@@ -263,7 +213,7 @@ const BuyMedicine: React.FC = () => {
       }
       return matchesSearch;
     });
-  }, [activeTab, searchTerm, filterType]);
+  }, [activeTab, searchTerm, filterType, medicines]);
 
   const calculateTotal = useCallback(() => {
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -308,10 +258,9 @@ const BuyMedicine: React.FC = () => {
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 py-6">
           {/* Prescription Upload Area */}
-          <div 
-            className={`mb-6 p-6 border-2 border-dashed rounded-lg text-center transition-colors ${
-              isDragging ? 'border-teal-500 bg-teal-50' : 'border-teal-200'
-            }`}
+          <div
+            className={`mb-6 p-6 border-2 border-dashed rounded-lg text-center transition-colors ${isDragging ? 'border-teal-500 bg-teal-50' : 'border-teal-200'
+              }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -394,9 +343,9 @@ const BuyMedicine: React.FC = () => {
           <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="mb-6">
             <TabsList className="bg-teal-100 flex flex-wrap">
               {categories.map((category) => (
-                <TabsTrigger 
-                  key={category.id} 
-                  value={category.id} 
+                <TabsTrigger
+                  key={category.id}
+                  value={category.id}
                   className="text-xs sm:text-sm data-[state=active]:bg-teal-600 data-[state=active]:text-white flex-1 sm:flex-none"
                 >
                   {category.icon}
@@ -423,7 +372,7 @@ const BuyMedicine: React.FC = () => {
                       <CardContent>
                         <div className="space-y-4">
                           <p className="text-sm text-gray-600">{medicine.description}</p>
-                          
+
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div className="flex items-center text-gray-600">
                               <Pill className="h-4 w-4 mr-2" />
@@ -449,11 +398,10 @@ const BuyMedicine: React.FC = () => {
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`h-4 w-4 ${
-                                      i < Math.floor(medicine.rating || 0)
-                                        ? 'text-yellow-400 fill-current'
-                                        : 'text-gray-300'
-                                    }`}
+                                    className={`h-4 w-4 ${i < Math.floor(medicine.rating || 0)
+                                      ? 'text-yellow-400 fill-current'
+                                      : 'text-gray-300'
+                                      }`}
                                   />
                                 ))}
                               </div>
@@ -476,12 +424,12 @@ const BuyMedicine: React.FC = () => {
                                 </span>
                                 {medicine.discount && (
                                   <span className="text-sm text-gray-500 line-through">
-                                    ₹{(medicine.price * (1 + medicine.discount/100)).toFixed(2)}
+                                    ₹{(medicine.price * (1 + medicine.discount / 100)).toFixed(2)}
                                   </span>
                                 )}
                               </div>
                             </div>
-                            <Button 
+                            <Button
                               onClick={() => addToCart(medicine)}
                               className="bg-teal-600 hover:bg-teal-700"
                               disabled={medicine.requires_prescription && !prescription}
@@ -505,7 +453,7 @@ const BuyMedicine: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-teal-700">Shopping Cart</CardTitle>
                 <div className="text-sm text-teal-600 bg-teal-50 p-3 rounded-md mt-2">
-                  🎉 Free delivery on orders above ₹399! {calculateTotal().subtotal <= 399 && 
+                  🎉 Free delivery on orders above ₹399! {calculateTotal().subtotal <= 399 &&
                     `Add items worth ₹${(399 - calculateTotal().subtotal).toFixed(2)} more for free delivery.`}
                 </div>
               </CardHeader>

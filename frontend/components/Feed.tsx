@@ -1,5 +1,6 @@
 "use client"
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { getFeed } from '@/apilib/ApiGet';
 import { 
   Heart, 
   Share2, 
@@ -59,7 +60,7 @@ interface Post {
   readTime: string;
   trending: boolean;
   image?: string;
-  completedTime?: string; // Added completedTime field
+  completedTime?: string; 
 }
 
 const categories = [
@@ -113,8 +114,7 @@ const PostCard = React.memo(({ post, onLike, onComment }: { post: Post; onLike: 
             <span className="text-sm text-teal-600 font-medium">{post.author.role}</span>
           </div>
           <p className="text-sm text-gray-500">
-            {post.timestamp} • {post.readTime}
-            {post.completedTime && ` • Completed ${post.completedTime}`}
+            {new Date(post.timestamp).toLocaleString()} • {post.readTime} • {post.completedTime && new Date(post.completedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
       </CardHeader>
@@ -248,183 +248,93 @@ const HealthFeed: React.FC = () => {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      // Simulated API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const initialPosts: Post[] = [
-        {
-          id: '1',
-          author: {
-            id: 'dr_sarah',
-            name: 'Dr. Sarah Johnson',
-            avatar: '/logo.ico',
-            role: 'Nutritionist',
-            verified: true
-          },
-          content: 'New research suggests that incorporating Mediterranean diet principles can significantly improve heart health and cognitive function. Here are the key takeaways from the latest study...',
-          timestamp: '2 hours ago',
-          completedTime: '1 hour ago', // Added completed time
-          likes: 245,
-          liked: false,
-          comments: [
-            {
-              id: '1',
-              author: {
-                id: 'user1',
-                name: 'Anonymous User',
-                avatar: '/default-avatar.png',
-                role: 'juliet',
-                verified: false
-              },
-              content: "Great article!",
-              timestamp: '2 hours ago',
-              likes: 10
-            },
-            {
-              id: '2', 
-              author: {
-                id: 'user2',
-                name: 'Anonymous User',
-                avatar: '/default-avatar.png',
-                role: 'phd',
-                verified: false
-              },
-              content: "Thanks for sharing this valuable information.",
-              timestamp: '2 hours ago',
-              likes: 10
-            },
-            {
-              id: '3',
-              author: {
-                id: 'user3',
-                name: 'Anonymous User',
-                avatar: '/default-avatar.png',
-                role: 'romeo',
-                verified: false
-              },
-              content: "I'm going to start incorporating these changes right away.",
-              timestamp: '2 hours ago',
-              likes: 10
-            }
-          ],
-          shares: 18,
-          tags: ['Nutrition', 'Research', 'Heart Health'],
-          readTime: '3 min read',
-          trending: true,
-          image: '/logo.ico'
-        },
-        {
-          id: '2',
-          author: {
-            id: 'coach_mike',
-            name: 'Coach Mike',
-            avatar: '/logo.ico',
-            role: 'Fitness Expert',
-            verified: true
-          },
-          content: 'Stop focusing on lengthy cardio sessions! High-Intensity Interval Training (HIIT) can give you better results in less time. Here\'s a 20-minute workout that burns more calories than an hour of jogging...',
-          timestamp: '4 hours ago',
-          completedTime: '3 hours ago', // Added completed time
-          likes: 189,
-          liked: false,
-          comments: [
-            {
-              id: '1',
-              author: {
-                id: 'fitness_enthusiast',
-                name: 'Sarah Johnson',
-                avatar: '/default-avatar.png',
-                role: 'Fitness Trainer',
-                verified: false
-              },
-              content: "This HIIT workout looks intense but effective! I'll definitely try it with my clients.",
-              timestamp: '1 hour ago',
-              likes: 15
-            },
-            {
-              id: '2',
-              author: {
-                id: 'gym_lover',
-                name: 'Mark Wilson',
-                avatar: '/default-avatar.png',
-                role: 'Amateur Athlete',
-                verified: false
-              },
-              content: "I've been doing HIIT for 6 months now and the results are amazing. Great tips Coach!",
-              timestamp: '2 hours ago', 
-              likes: 8
-            },
-            {
-              id: '3',
-              author: {
-                id: 'health_pro',
-                name: 'Dr. Emily Chen',
-                avatar: '/default-avatar.png',
-                role: 'Sports Medicine',
-                verified: true
-              },
-              content: "Important reminder to warm up properly before attempting any HIIT workout to prevent injury.",
-              timestamp: '3 hours ago',
-              likes: 25
-            }
-          ],
-          shares: 24,
-          tags: ['Fitness', 'HIIT', 'Workout'],
-          readTime: '4 min read',
-          trending: true,
-          image: '/logo.ico'
-        }
-      ];
-
-      setPosts(initialPosts);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const response = await getFeed(); 
+        setPosts(response);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load posts. Please try again later.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchPosts();
   }, []);
 
-  const handleLike = useCallback((postId: string) => {
-    setPosts(currentPosts => 
-      currentPosts.map(post => 
-        post.id === postId 
-          ? { 
-              ...post, 
-              likes: post.liked ? post.likes - 1 : post.likes + 1,
-              liked: !post.liked 
-            } 
-          : post
-      )
-    );
+  const handleLike = useCallback(async (postId: string) => {
+    try {
+      // Optimistic update
+      setPosts(currentPosts => 
+        currentPosts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                likes: post.liked ? post.likes - 1 : post.likes + 1,
+                liked: !post.liked 
+              } 
+            : post
+        )
+      );
+    } catch (error) {
+      console.error('Error updating like:', error);
+      // Revert optimistic update if API call fails
+      setPosts(currentPosts => 
+        currentPosts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                likes: post.liked ? post.likes + 1 : post.likes - 1,
+                liked: !post.liked 
+              } 
+            : post
+        )
+      );
+    }
   }, []);
 
-  const handleComment = useCallback((postId: string, commentText: string) => {
+  const handleComment = useCallback(async (postId: string, commentText: string) => {
     if (!commentText.trim()) return;
 
-    setPosts(currentPosts => 
-      currentPosts.map(post => {
-        if (post.id === postId) {
-          const newComment: Comment = {
-            id: Date.now().toString(),
-            author: {
-              id: 'current-user',
-              name: 'You',
-              avatar: '/logo.ico',
-              role: 'Member',
-              verified: false
-            },
-            content: commentText,
-            timestamp: 'Just now',
-            likes: 0
-          };
+    try {
+      const newComment = {
+        id: Math.random().toString(),
+        author: {
+          id: "1",
+          name: "Current User",
+          avatar: "/avatar.png",
+          role: "Member",
+          verified: false
+        },
+        content: commentText,
+        timestamp: new Date().toISOString(),
+        likes: 0
+      };
 
-          return {
-            ...post,
-            comments: [newComment, ...post.comments]
-          };
-        }
-        return post;
-      })
-    );
+      setPosts(currentPosts => 
+        currentPosts.map(post => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              comments: [newComment, ...post.comments]
+            };
+          }
+          return post;
+        })
+      );
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add comment. Please try again.",
+        variant: "destructive"
+      });
+    }
   }, []);
 
   const filteredPosts = useMemo(() => {
@@ -653,3 +563,31 @@ const HealthFeed: React.FC = () => {
 };
 
 export default HealthFeed;
+
+// # SQL Insert Statements
+// authors_insert = """
+// INSERT INTO authors (id, name, avatar, role, verified) VALUES 
+// ('dr_sarah', 'Dr. Sarah Johnson', '/logo.ico', 'Nutritionist', true),
+// ('coach_mike', 'Coach Mike', '/logo.ico', 'Fitness Expert', true),
+// ('dr_emily', 'Dr. Emily Chen', '/default-avatar.png', 'Sports Medicine', true),
+// ('health_guru', 'Dr. David Lee', '/logo.ico', 'Wellness Expert', true),
+// ('fitness_pro', 'Jessica Smith', '/logo.ico', 'Personal Trainer', true);
+// """
+
+// posts_insert = """
+// INSERT INTO posts (id, author_id, content, timestamp, likes, liked, shares, tags, read_time, trending, image, completed_time) VALUES
+// ('post_1', 'dr_sarah', 'New research suggests that incorporating Mediterranean diet principles can significantly improve heart health and cognitive function. Here are the key takeaways from the latest study...', '2024-02-10 14:00:00', 245, false, 18, 'Nutrition,Research,Heart Health', '3 min read', true, '/logo.ico', '2024-02-10 15:00:00'),
+// ('post_2', 'coach_mike', 'Stop focusing on lengthy cardio sessions! High-Intensity Interval Training (HIIT) can give you better results in less time. Here''s a 20-minute workout that burns more calories than an hour of jogging...', '2024-02-10 12:00:00', 189, false, 24, 'Fitness,HIIT,Workout', '4 min read', true, '/logo.ico', '2024-02-10 13:00:00'),
+// ('post_3', 'dr_emily', 'The importance of proper warm-up routines: Preventing injuries and maximizing workout effectiveness. Here''s a comprehensive guide...', '2024-02-10 10:00:00', 167, false, 15, 'Sports Medicine,Fitness,Health', '5 min read', true, '/logo.ico', '2024-02-10 11:00:00'),
+// ('post_4', 'health_guru', 'Mindful eating practices for better digestion and weight management. Learn how to transform your relationship with food...', '2024-02-10 08:00:00', 156, false, 22, 'Nutrition,Wellness,Mindfulness', '4 min read', false, '/logo.ico', '2024-02-10 09:00:00'),
+// ('post_5', 'fitness_pro', 'Building lean muscle: A science-based approach to strength training. Discover the optimal rep ranges and recovery techniques...', '2024-02-10 06:00:00', 178, false, 20, 'Strength Training,Fitness,Science', '6 min read', true, '/logo.ico', '2024-02-10 07:00:00');
+// """
+
+// comments_insert = """
+// INSERT INTO comments (id, author_id, content, timestamp, likes, post_id) VALUES
+// ('comment_1', 'fitness_pro', 'This HIIT workout looks intense but effective! I''ll definitely try it with my clients.', '2024-02-10 13:00:00', 15, 'post_2'),
+// ('comment_2', 'dr_emily', 'Important reminder to warm up properly before attempting any HIIT workout to prevent injury.', '2024-02-10 13:30:00', 25, 'post_2'),
+// ('comment_3', 'health_guru', 'Great insights on Mediterranean diet! The research is very promising.', '2024-02-10 14:30:00', 20, 'post_1'),
+// ('comment_4', 'coach_mike', 'Excellent points about strength training. I''ve seen similar results with my clients.', '2024-02-10 07:00:00', 18, 'post_5'),
+// ('comment_5', 'dr_sarah', 'The connection between mindful eating and digestion is fascinating. Great article!', '2024-02-10 09:30:00', 22, 'post_4');
+// """

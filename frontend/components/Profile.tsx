@@ -1,3 +1,6 @@
+//addfunctionality to logout button
+
+
 "use client"
 import React, { useState } from 'react';
 import { User, Settings, LogOut, Bell, Edit, AlertCircle, Calendar, Activity, Heart, FileText, Pill, Stethoscope, ClipboardList } from 'lucide-react';

@@ -4,7 +4,7 @@ import { SignupFormData , LoginFormData } from '@/interface';
 
 export const signup = async (userData : SignupFormData) : Promise<any> => {
     try {
-        const response = await apiInstance.post("/signup", userData, {
+        const response = await apiInstance.post("/authenticate/signup", userData, {
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -23,7 +23,7 @@ export const login = async (userData : LoginFormData) : Promise<any> => {
     formData.append("username", userData.email)
     formData.append("password", userData.password)
     try {
-        const response = await apiInstance.post("/login", formData , {
+        const response = await apiInstance.post("/authenticate/login", formData , {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
