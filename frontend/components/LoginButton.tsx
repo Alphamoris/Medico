@@ -16,7 +16,7 @@ export function LoginButton() {
         containerClassName="rounded-full"
         as="button"
         onClick={() => router.push("authenticate/login")}
-        className="bg-black text-white dark:text-white flex items-center"
+        className="bg-teal-600 text-white dark:text-white flex items-center"
       >
         <span className="flex items-center text-xs">Login <LogInIcon className=" ms-2" /></span>
       </HoverBorderGradient>

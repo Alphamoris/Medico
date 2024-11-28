@@ -18,7 +18,7 @@ const LoginSlice = createSlice({
     reducers: {
         setIsLoggedIn: (state, action) => {
             state.isLoggedIn = action.payload;
-            localStorage.setItem("isLoggedIn", action.payload.toString());
+            localStorage.setItem("isLoggedIn", action.payload);
         },
     },
 });

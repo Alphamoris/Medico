@@ -3,36 +3,96 @@ import { useState, useEffect } from "react";
 import { Plus, Video, Mic, MessageSquare, X, Users, Share2, Settings, Shield, Wifi, Clock, Users2, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { postRoom, postJoinRoom } from "../apilib/ApiPost";
+import { useSelector } from "react-redux";
+import { jwtDecode } from "jwt-decode";
+import { selectJWTToken } from "@/Redux/jwtSlice";
+import { getRoom } from "@/apilib/ApiGet";
 
 interface Room {
   id: string;
   name: string;
   password: string;
-  createdAt: Date;
+  createdTime: string;
+  createdDate: string;
   participants: number;
   quality: string;
   isPrivate: boolean;
   maxParticipants: number;
   dataUsage?: string;
-  joinCode: string; // Added join code field
+  joinCode: string;
+  lastActivity?: Date;
+}
+
+interface DecodedToken {
+  exp: number;
+  u_id: number;
+}
+
+interface RoomData {
+  join_code: number;
+  password: string;
+  room_name: string;
+  created_date: string;
+  created_time: string;
 }
 
 const ChatRoom: React.FC = () => {
   const router = useRouter();
+  const token = useSelector(selectJWTToken);
+
+  // State management
   const [rooms, setRooms] = useState<Room[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [roomToDiscard, setRoomToDiscard] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  // Form states
   const [roomName, setRoomName] = useState("");
   const [roomPassword, setRoomPassword] = useState("");
-  const [roomId, setRoomId] = useState("");
   const [joinPassword, setJoinPassword] = useState("");
-  const [error, setError] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const [maxParticipants, setMaxParticipants] = useState(10);
   const [networkQuality, setNetworkQuality] = useState("HD");
-  const [joinCode, setJoinCode] = useState(""); // Added join code state
+  const [joinCode, setJoinCode] = useState("");
+
+  // Load existing rooms on component mount
+  useEffect(() => {
+    const loadExistingRooms = async () => {
+      try {
+        if (!token) return;
+        
+        const decoded: DecodedToken = jwtDecode(token);
+        const roomDetails = await getRoom(decoded.u_id);
+        
+        // Transform and set rooms if they exist
+        if (roomDetails) {
+          const existingRoom: Room = {
+            id: generateRoomId(),
+            name: roomDetails.room_name,
+            password: roomDetails.password,
+            createdDate: roomDetails.created_date,
+            createdTime: roomDetails.created_time,
+            participants: 0,
+            quality: networkQuality,
+            isPrivate: isPrivate,
+            maxParticipants: maxParticipants,
+            dataUsage: qualitySettings[networkQuality as keyof typeof qualitySettings].dataUsage,
+            joinCode: roomDetails.join_code,
+            lastActivity: new Date()
+          };
+          setRooms([existingRoom]);
+        }
+      } catch (err) {
+        console.error("Error loading rooms:", err);
+        setError("Failed to load existing rooms");
+      }
+    };
+
+    loadExistingRooms();
+  }, [token]);
 
   const qualitySettings = {
     'HD': {
@@ -52,78 +112,95 @@ const ChatRoom: React.FC = () => {
     }
   };
 
-  const generateRoomId = () => {
-    return Math.random().toString(36).substring(2, 9);
-  };
+  const generateRoomId = () => Math.random().toString(36).substring(2, 8);
+  const generateJoinCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-  // Generate a unique 6-digit join code
-  const generateJoinCode = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  };
-
-  const createRoom = () => {
+  const validateRoomCreation = () => {
     if (rooms.length >= 3) {
       setError("You can only create up to 3 rooms simultaneously");
-      return;
+      return false;
     }
-
     if (!roomName.trim()) {
       setError("Room name is required");
-      return;
+      return false;
     }
-
     if (!roomPassword.trim()) {
       setError("Room password is required");
-      return;
+      return false;
     }
+    return true;
+  };
 
-    const uniqueJoinCode = generateJoinCode();
+  const createRoom = async () => {
+    if (!validateRoomCreation()) return;
 
-    const newRoom: Room = {
-      id: generateRoomId(),
-      name: roomName,
-      password: roomPassword,
-      createdAt: new Date(),
-      participants: 0,
-      quality: networkQuality,
-      isPrivate: isPrivate,
-      maxParticipants: maxParticipants,
-      dataUsage: qualitySettings[networkQuality as keyof typeof qualitySettings].dataUsage,
-      joinCode: uniqueJoinCode
-    };
+    try {
+      const uniqueJoinCode = generateJoinCode();
+      const roomId = generateRoomId();
+      
+      if (!token) {
+        setError("Authentication required");
+        return;
+      }
 
-    setRooms([...rooms, newRoom]);
+      const decoded: DecodedToken = jwtDecode(token);
+      await postRoom(decoded.u_id, roomName, parseInt(uniqueJoinCode), roomPassword);
+      const roomDetails: RoomData = await getRoom(decoded.u_id);
+
+      const newRoom: Room = {
+        id: roomId,
+        name: roomDetails.room_name,
+        password: roomDetails.password,
+        createdDate: roomDetails.created_date,
+        createdTime: roomDetails.created_time,
+        participants: 0,
+        quality: networkQuality,
+        isPrivate: isPrivate,
+        maxParticipants: maxParticipants,
+        dataUsage: qualitySettings[networkQuality as keyof typeof qualitySettings].dataUsage,
+        joinCode: uniqueJoinCode,
+        lastActivity: new Date()
+      };
+
+      setRooms(prevRooms => [...prevRooms, newRoom]);
+      resetFormAndCloseModal();
+    } catch (err) {
+      console.error("Error creating room:", err);
+      setError("Failed to create room. Please try again.");
+    }
+  };
+
+  const resetFormAndCloseModal = () => {
     setShowCreateModal(false);
     setRoomName("");
     setRoomPassword("");
     setError("");
   };
 
-  const joinRoom = (joinCode: string) => {
-    const room = rooms.find(r => r.joinCode === joinCode);
-    if (!room) {
-      setError("Room not found. Please check your join code.");
-      return;
-    }
+  const joinRoom = async (joinCode: string) => {
+    try {
+      const room = rooms.find(r => r.joinCode === joinCode);
+      if (!room) {
+        setError("Room not found. Please check your join code.");
+        return;
+      }
 
-    if (!joinPassword) {
-      setError("Please enter room password");
-      return;
-    }
+      if (!joinPassword) {
+        setError("Please enter room password");
+        return;
+      }
 
-    if (room.password !== joinPassword) {
-      setError("Incorrect password");
-      return;
-    }
+      if (room.participants >= room.maxParticipants) {
+        setError("Room is full");
+        return;
+      }
 
-    if (room.participants >= room.maxParticipants) {
-      setError("Room is full");
-      return;
+      await postJoinRoom(parseInt(joinCode));
+      router.push(`/websockets/${room.id}`);
+    } catch (err) {
+      console.error("Error joining room:", err);
+      setError("Failed to join room. Please try again.");
     }
-
-    // Websocket connection and room joining logic will be implemented here
-    console.log(`Joining room with code: ${room.id}`);
-    router.push(`/websockets/${room.id}`);
   };
 
   const handleDiscardRoom = (roomId: string) => {
@@ -133,7 +210,7 @@ const ChatRoom: React.FC = () => {
 
   const confirmDiscard = () => {
     if (roomToDiscard) {
-      setRooms(rooms.filter(room => room.id !== roomToDiscard));
+      setRooms(prevRooms => prevRooms.filter(room => room.id !== roomToDiscard));
       setShowDiscardConfirm(false);
       setRoomToDiscard(null);
     }
@@ -221,9 +298,21 @@ const ChatRoom: React.FC = () => {
                 </div>
                 
                 <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />
-                    <span>Room ID: {room.id}</span>
+                    <span>Join Code : {room.joinCode}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Password : {room.password}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>Created Date : {room.createdDate}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>Created Time : {room.createdTime}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Users2 className="w-4 h-4" />
@@ -234,16 +323,8 @@ const ChatRoom: React.FC = () => {
                     <span>{room.quality} Quality ({room.dataUsage})</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    <span>Created {room.createdAt.toLocaleTimeString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <Shield className="w-4 h-4" />
                     <span>{room.isPrivate ? 'Private' : 'Public'} Room</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    <span>Join Code: {room.joinCode}</span>
                   </div>
                 </div>
 

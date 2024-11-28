@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
 
   // Define routes to exclude from layout
-  const excludedRoutes = ['/authenticate/login', '/authenticate/signup', '/404'];
+  const excludedRoutes = ['/authenticate/login', '/authenticate/signup', '/404' , "/websockets/[roomid]"];
 
   // Check if current route should be excluded
   const isExcluded = excludedRoutes.includes(pathname);
@@ -24,13 +24,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // Conditional rendering based on route
   return (
     <html lang="en">
+      <head>
+        <title>Medico</title>
+        <link rel="icon" href="/logo.ico" ></link>
+      </head>
       <body className="bg-indigo-100">
         <Provider store={store}>
           {isExcluded ? children : (
             <>
               {children}
-              {/* <LowerNavbar /> */}
-              {/* <Footer /> */}
+              <LowerNavbar />
+              <Footer />
             </>
           )}
         </Provider>

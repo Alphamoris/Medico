@@ -33,19 +33,19 @@ const Footer: React.FC = () => {
   ];
 
   const quickLinks: QuickLink[] = [
-    { label: "Home", href: "#" },
-    { label: "About Us", href: "#" },
-    { label: "Services", href: "#" },
-    { label: "Doctors", href: "#" },
-    { label: "Appointments", href: "#" }
+    { label: "Home", href: "/" },
+    { label: "About Us", href: "contactus" },
+    { label: "Services", href: "/" },
+    { label: "Doctors", href: "/appointment/finddoctor" },
+    { label: "Appointments", href: "appointment" }
   ];
 
   const services: ServiceLink[] = [
-    { label: "Primary Care", href: "#" },
-    { label: "Emergency Care", href: "#" },
-    { label: "Mental Health", href: "#" },
-    { label: "Dental Care", href: "#" },
-    { label: "Specialized Treatment", href: "#" }
+    { label: "Primary Care", href: "/appointment/finddoctor" },
+    { label: "Emergency Care", href: "/appointment/finddoctor" },
+    { label: "Mental Health", href: "/appointment/finddoctor" },
+    { label: "Dental Care", href: "/appointment/finddoctor" },
+    { label: "Specialized Treatment", href: "appointment/finddoctor" }
   ];
 
   return (

@@ -1,7 +1,5 @@
 import apiInstance from './ApiInstance';
-import { Medicine } from '@/components/BuyMedicines';
 
-// No need to explicitly mention interceptors here since they are handled in ApiInstance
 export const getMedicines = async (): Promise<any> => {
     try {
         const response = await apiInstance.get("/medicines", {
@@ -10,12 +8,11 @@ export const getMedicines = async (): Promise<any> => {
             }
         });
 
-        return response.data;  // Return data to be used in the component
+        return response.data;
     } catch (error) {
-        throw new Error // Let the component handle the error
+        throw new Error;
     }
 };
-
 
 export const getFeed = async (): Promise<any> => {
     try {
@@ -25,13 +22,11 @@ export const getFeed = async (): Promise<any> => {
             }
         });
 
-        return response.data;  // Return data to be used in the component
+        return response.data;
     } catch (error) {
-        throw new Error // Let the component handle the error
+        throw new Error;
     }
 };
-
-
 
 export const getDoctors = async (): Promise<any> => {
     try {
@@ -41,8 +36,22 @@ export const getDoctors = async (): Promise<any> => {
             }
         });
 
-        return response.data;  // Return data to be used in the component
+        return response.data;
     } catch (error) {
-        throw new Error // Let the component handle the error
+        throw new Error;
+    }
+};
+
+export const getRoom = async (userId: number): Promise<any> => {
+    try {
+        const response = await apiInstance.get(`/rooms/get_room_details?id=${userId}`, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        return response.data;
+    } catch (error) {
+        throw new Error;
     }
 };

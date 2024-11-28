@@ -1,7 +1,9 @@
 import VideoConference from "@/components/WSpage";
 
- export default function Page({ params }: { params: { roomid: string } }) {
-    return <div>Hello {params.roomid}
-   
+export default async function Page({ params }: { params: { roomid: string } }) {
+  return (
+    <div>
+      <VideoConference roomid={params.roomid} />
     </div>
-  }
+  )
+}
