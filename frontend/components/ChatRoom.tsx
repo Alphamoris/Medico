@@ -4,10 +4,12 @@ import { Plus, Video, Mic, MessageSquare, X, Users, Share2, Settings, Shield, Wi
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { postRoom, postJoinRoom } from "../apilib/ApiPost";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import { selectJWTToken } from "@/Redux/jwtSlice";
-import { getRoom } from "@/apilib/ApiGet";
+import { getRoom, deleteRoom, getRoombyJoinCode } from "@/apilib/ApiGet";
+import { setRooms, selectRooms } from "@/Redux/RoomSlice";
+import { AppDispatch, RootState } from "@/Redux/Store";
 
 interface Room {
   id: string;
@@ -33,16 +35,23 @@ interface RoomData {
   join_code: number;
   password: string;
   room_name: string;
-  created_date: string;
-  created_time: string;
+  date: string;
+  time: string;
+}
+
+interface RoomState {
+  joinCode: string;
+  password: string;
 }
 
 const ChatRoom: React.FC = () => {
   const router = useRouter();
   const token = useSelector(selectJWTToken);
+  const dispatch = useDispatch<AppDispatch>();
+  const roomState = useSelector((state: RootState) => selectRooms(state));
 
   // State management
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const [rooms, setLocalRooms] = useState<Room[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
@@ -65,25 +74,25 @@ const ChatRoom: React.FC = () => {
         if (!token) return;
         
         const decoded: DecodedToken = jwtDecode(token);
-        const roomDetails = await getRoom(decoded.u_id);
+        const roomDetails: RoomData[] = await getRoom(decoded.u_id);
         
         // Transform and set rooms if they exist
-        if (roomDetails) {
-          const existingRoom: Room = {
+        if (roomDetails && roomDetails.length > 0) {
+          const existingRooms = roomDetails.map(room => ({
             id: generateRoomId(),
-            name: roomDetails.room_name,
-            password: roomDetails.password,
-            createdDate: roomDetails.created_date,
-            createdTime: roomDetails.created_time,
+            name: room.room_name,
+            password: room.password,
+            createdDate: room.date,
+            createdTime: room.time,
             participants: 0,
             quality: networkQuality,
             isPrivate: isPrivate,
             maxParticipants: maxParticipants,
             dataUsage: qualitySettings[networkQuality as keyof typeof qualitySettings].dataUsage,
-            joinCode: roomDetails.join_code,
+            joinCode: room.join_code.toString(),
             lastActivity: new Date()
-          };
-          setRooms([existingRoom]);
+          }));
+          setLocalRooms(existingRooms);
         }
       } catch (err) {
         console.error("Error loading rooms:", err);
@@ -145,14 +154,15 @@ const ChatRoom: React.FC = () => {
 
       const decoded: DecodedToken = jwtDecode(token);
       await postRoom(decoded.u_id, roomName, parseInt(uniqueJoinCode), roomPassword);
-      const roomDetails: RoomData = await getRoom(decoded.u_id);
+      const roomDetails: RoomData[] = await getRoom(decoded.u_id);
+      const latestRoom = roomDetails[roomDetails.length - 1];
 
       const newRoom: Room = {
         id: roomId,
-        name: roomDetails.room_name,
-        password: roomDetails.password,
-        createdDate: roomDetails.created_date,
-        createdTime: roomDetails.created_time,
+        name: latestRoom.room_name,
+        password: latestRoom.password,
+        createdDate: latestRoom.date,
+        createdTime: latestRoom.time,
         participants: 0,
         quality: networkQuality,
         isPrivate: isPrivate,
@@ -162,7 +172,7 @@ const ChatRoom: React.FC = () => {
         lastActivity: new Date()
       };
 
-      setRooms(prevRooms => [...prevRooms, newRoom]);
+      setLocalRooms(prevRooms => [...prevRooms, newRoom]);
       resetFormAndCloseModal();
     } catch (err) {
       console.error("Error creating room:", err);
@@ -179,24 +189,36 @@ const ChatRoom: React.FC = () => {
 
   const joinRoom = async (joinCode: string) => {
     try {
-      const room = rooms.find(r => r.joinCode === joinCode);
-      if (!room) {
+      if (!joinCode || !joinPassword) {
+        setError("Join code and password are required");
+        return;
+      }
+
+      const roomResponse = await getRoombyJoinCode(parseInt(joinCode));
+      
+      if (!roomResponse) {
         setError("Room not found. Please check your join code.");
         return;
       }
 
-      if (!joinPassword) {
-        setError("Please enter room password");
+      if (roomResponse.password !== joinPassword) {
+        setError("Incorrect password");
         return;
       }
 
-      if (room.participants >= room.maxParticipants) {
-        setError("Room is full");
-        return;
-      }
+      // Save join code and password to Redux state
+      const roomState: RoomState = {
+        joinCode: joinCode,
+        password: joinPassword
+      };
+      
+      dispatch(setRooms(roomState));
 
+      // Generate random room ID and redirect
+      const randomRoomId = generateRoomId();
       await postJoinRoom(parseInt(joinCode));
-      router.push(`/websockets/${room.id}`);
+      router.push(`/websockets/${randomRoomId}`);
+      
     } catch (err) {
       console.error("Error joining room:", err);
       setError("Failed to join room. Please try again.");
@@ -208,11 +230,20 @@ const ChatRoom: React.FC = () => {
     setShowDiscardConfirm(true);
   };
 
-  const confirmDiscard = () => {
+  const confirmDiscard = async () => {
     if (roomToDiscard) {
-      setRooms(prevRooms => prevRooms.filter(room => room.id !== roomToDiscard));
-      setShowDiscardConfirm(false);
-      setRoomToDiscard(null);
+      try {
+        const room = rooms.find(r => r.id === roomToDiscard);
+        if (room) {
+          await deleteRoom(parseInt(room.joinCode));
+          setLocalRooms(prevRooms => prevRooms.filter(room => room.id !== roomToDiscard));
+        }
+        setShowDiscardConfirm(false);
+        setRoomToDiscard(null);
+      } catch (err) {
+        console.error("Error deleting room:", err);
+        setError("Failed to delete room. Please try again.");
+      }
     }
   };
 

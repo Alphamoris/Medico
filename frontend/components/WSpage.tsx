@@ -31,14 +31,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSelector } from "react-redux";
+import { selectRooms } from "@/Redux/RoomSlice";
+import { RootState } from '@/Redux/Store';
 
-
-
+// WebRTC configuration
 const configuration = {
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'turn:numb.viagenie.ca', username: 'webrtc@live.com', credential: 'muazkh' }
+    { urls: ['stun:stun.l.google.com:19302'] },
+    { urls: ['stun:stun1.l.google.com:19302'] }
   ]
 };
 
@@ -56,12 +57,11 @@ interface Participant {
   name: string;
   stream: MediaStream | null;
   peerConnection: RTCPeerConnection;
-  dataChannel: RTCDataChannel | null;
   isAudioEnabled: boolean;
   isVideoEnabled: boolean;
   isScreenSharing: boolean;
   isSpeaking: boolean;
-  videoRef?: React.RefObject<HTMLDivElement>;
+  videoRef: React.RefObject<HTMLDivElement>;
 }
 
 // Control Button Component
@@ -122,7 +122,7 @@ const Chat: React.FC<{
     <div className="flex flex-col h-full bg-teal-900/95 p-4 rounded-lg shadow-xl">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
-          <Image src="/logo.ico" alt="Medico Logo" width={30} height={30} />
+          <Image src="/logo.ico" alt="Medico Logo" width={30} height={30} priority />
           <h3 className="text-lg font-semibold text-white ml-2">Medico Chat</h3>
         </div>
         <button 
@@ -177,10 +177,13 @@ const Chat: React.FC<{
 };
 
 // Main VideoConference Component
-const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
+const VideoConference: React.FC = () => {
   const router = useRouter();
-  // WebSocket & WebRTC Configuration
-  const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080/ws/' + roomid;
+  const roomState = useSelector((state: RootState) => selectRooms(state));
+  const joinCode = roomState.joinCode;
+  const password = roomState.password;
+  
+  const WS_URL = process.env.NEXT_PUBLIC_WS_URL || `ws://localhost:8000/websockets/ws/${joinCode}/${password}`;
   const [participants, setParticipants] = useState<Map<string, Participant>>(new Map());
   const [messages, setMessages] = useState<Message[]>([]);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
@@ -196,42 +199,60 @@ const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
   const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>('');
   const [isConnectionEstablished, setIsConnectionEstablished] = useState(false);
   const [isReconnecting, setIsReconnecting] = useState(false);
-  const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
   const localVideoRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Initialize WebSocket connection with reconnection logic
+  // Initialize WebSocket connection
   useEffect(() => {
     const connectWebSocket = () => {
-      wsRef.current = new WebSocket(WS_URL);
-      
-      wsRef.current.onopen = () => {
-        console.log('WebSocket Connected');
-        setIsConnectionEstablished(true);
-        setIsReconnecting(false);
-        if (reconnectTimeoutRef.current) {
-          clearTimeout(reconnectTimeoutRef.current);
-        }
-      };
+      try {
+        wsRef.current = new WebSocket(WS_URL);
+        
+        wsRef.current.onopen = () => {
+          console.log('WebSocket Connected');
+          setIsConnectionEstablished(true);
+          setIsReconnecting(false);
+          
+          // Send initial user data
+          wsRef.current?.send(JSON.stringify({
+            user_id: Date.now().toString(),
+            username: 'User_' + Math.random().toString(36).substr(2, 5)
+          }));
 
-      wsRef.current.onmessage = async (event) => {
-        const data = JSON.parse(event.data);
-        handleWebSocketMessage(data);
-      };
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+          }
+        };
 
-      wsRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        setIsConnectionEstablished(false);
-      };
+        wsRef.current.onmessage = async (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            handleWebSocketMessage(data);
+          } catch (err) {
+            console.error('Error parsing WebSocket message:', err);
+          }
+        };
 
-      wsRef.current.onclose = () => {
-        setIsConnectionEstablished(false);
+        wsRef.current.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setIsConnectionEstablished(false);
+        };
+
+        wsRef.current.onclose = () => {
+          setIsConnectionEstablished(false);
+          if (!isReconnecting) {
+            setIsReconnecting(true);
+            reconnectTimeoutRef.current = setTimeout(connectWebSocket, 5000);
+          }
+        };
+      } catch (err) {
+        console.error('Error creating WebSocket connection:', err);
         if (!isReconnecting) {
           setIsReconnecting(true);
           reconnectTimeoutRef.current = setTimeout(connectWebSocket, 5000);
         }
-      };
+      }
     };
 
     connectWebSocket();
@@ -242,7 +263,7 @@ const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, []);
+  }, [WS_URL]);
 
   // Initialize media devices
   useEffect(() => {
@@ -317,67 +338,52 @@ const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
   // Handle WebSocket messages
   const handleWebSocketMessage = async (data: any) => {
     switch (data.type) {
-      case 'userJoined':
-        await handleUserJoined(data.userId, data.username);
+      case 'user_joined':
+        await handleUserJoined(data.client_id, data.username);
         break;
-      case 'userLeft':
-        handleUserLeft(data.userId);
+      case 'user_left':
+        handleUserLeft(data.client_id);
         break;
       case 'offer':
-        await handleOffer(data.offer, data.userId);
+        await handleOffer(data.offer, data.client_id);
         break;
       case 'answer':
-        await handleAnswer(data.answer, data.userId);
+        await handleAnswer(data.answer, data.client_id);
         break;
-      case 'iceCandidate':
-        handleIceCandidate(data.candidate, data.userId);
+      case 'ice_candidate':
+        handleIceCandidate(data.candidate, data.client_id);
         break;
       case 'chat':
         handleChatMessage(data);
         break;
-      case 'audioVideoState':
+      case 'media_state_update':
         handleParticipantMediaState(data);
+        break;
+      case 'ping':
+        wsRef.current?.send(JSON.stringify({ type: 'pong' }));
         break;
     }
   };
 
   // WebRTC connection handlers
-  const handleUserJoined = async (userId: string, username: string) => {
+  const handleUserJoined = async (clientId: string, username: string) => {
     const peerConnection = new RTCPeerConnection(configuration);
-    const dataChannel = peerConnection.createDataChannel('chat');
-    
-    // Set up data channel handlers
-    dataChannel.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'chat') {
-        handleChatMessage({
-          sender: username,
-          content: data.content
-        });
-      }
-    };
     
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         wsRef.current?.send(JSON.stringify({
-          type: 'iceCandidate',
+          type: 'ice_candidate',
           candidate: event.candidate,
-          userId
+          to_client: clientId
         }));
       }
     };
 
     peerConnection.ontrack = (event) => {
-      const participant = participants.get(userId);
+      const participant = participants.get(clientId);
       if (participant) {
         participant.stream = event.streams[0];
         setParticipants(new Map(participants));
-      }
-    };
-
-    peerConnection.onconnectionstatechange = () => {
-      if (peerConnection.connectionState === 'failed') {
-        handleConnectionFailure(userId);
       }
     };
 
@@ -387,66 +393,73 @@ const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
       });
     }
 
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+
+    wsRef.current?.send(JSON.stringify({
+      type: 'offer',
+      offer,
+      to_client: clientId
+    }));
+
     const newParticipant: Participant = {
-      id: userId,
-      name: username || `User ${userId}`,
+      id: clientId,
+      name: username,
       stream: null,
       peerConnection,
-      dataChannel,
       isAudioEnabled: true,
       isVideoEnabled: true,
       isScreenSharing: false,
       isSpeaking: false,
-      videoRef: React.createRef<HTMLDivElement>()
+      videoRef: React.createRef()
     };
 
-    setParticipants(prev => new Map(prev.set(userId, newParticipant)));
-    addSystemMessage(`${username || `User ${userId}`} joined the meeting`);
+    setParticipants(prev => new Map(prev.set(clientId, newParticipant)));
+    addSystemMessage(`${username} joined the meeting`);
   };
 
-  const handleUserLeft = (userId: string) => {
-    const participant = participants.get(userId);
+  const handleUserLeft = (clientId: string) => {
+    const participant = participants.get(clientId);
     if (participant) {
       participant.peerConnection.close();
-      participants.delete(userId);
+      participants.delete(clientId);
       setParticipants(new Map(participants));
       addSystemMessage(`${participant.name} left the meeting`);
     }
   };
 
-  const handleOffer = async (offer: RTCSessionDescriptionInit, userId: string) => {
-    const participant = participants.get(userId);
+  const handleOffer = async (offer: RTCSessionDescriptionInit, clientId: string) => {
+    const participant = participants.get(clientId);
     if (participant) {
       try {
         await participant.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await participant.peerConnection.createAnswer();
         await participant.peerConnection.setLocalDescription(answer);
+        
         wsRef.current?.send(JSON.stringify({
           type: 'answer',
           answer,
-          userId
+          to_client: clientId
         }));
       } catch (err) {
         console.error('Error handling offer:', err);
-        handleConnectionFailure(userId);
       }
     }
   };
 
-  const handleAnswer = async (answer: RTCSessionDescriptionInit, userId: string) => {
-    const participant = participants.get(userId);
+  const handleAnswer = async (answer: RTCSessionDescriptionInit, clientId: string) => {
+    const participant = participants.get(clientId);
     if (participant) {
       try {
         await participant.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
       } catch (err) {
         console.error('Error handling answer:', err);
-        handleConnectionFailure(userId);
       }
     }
   };
 
-  const handleIceCandidate = (candidate: RTCIceCandidateInit, userId: string) => {
-    const participant = participants.get(userId);
+  const handleIceCandidate = (candidate: RTCIceCandidateInit, clientId: string) => {
+    const participant = participants.get(clientId);
     if (participant) {
       participant.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
         .catch(err => {
@@ -455,21 +468,12 @@ const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
     }
   };
 
-  const handleConnectionFailure = (userId: string) => {
-    console.log(`Connection failed with user ${userId}, attempting to reconnect...`);
-    const participant = participants.get(userId);
-    if (participant) {
-      handleUserLeft(userId);
-      handleUserJoined(userId, participant.name);
-    }
-  };
-
   const handleParticipantMediaState = (data: { 
-    userId: string, 
+    client_id: string, 
     isAudioEnabled: boolean, 
     isVideoEnabled: boolean 
   }) => {
-    const participant = participants.get(data.userId);
+    const participant = participants.get(data.client_id);
     if (participant) {
       participant.isAudioEnabled = data.isAudioEnabled;
       participant.isVideoEnabled = data.isVideoEnabled;
@@ -507,23 +511,11 @@ const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
   };
 
   const sendChatMessage = (content: string) => {
-    // Send message through WebSocket
     wsRef.current?.send(JSON.stringify({
       type: 'chat',
       content
     }));
 
-    // Send message through data channels to all participants
-    participants.forEach(participant => {
-      if (participant.dataChannel?.readyState === 'open') {
-        participant.dataChannel.send(JSON.stringify({
-          type: 'chat',
-          content
-        }));
-      }
-    });
-
-    // Add message to local state
     handleChatMessage({
       sender: 'You',
       content
@@ -531,20 +523,29 @@ const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
   };
 
   // Media control handlers
-  const toggleVideo = useCallback(() => {
-    if (localStream) {
-      localStream.getVideoTracks().forEach(track => {
-        track.enabled = !isVideoEnabled;
-      });
-      setIsVideoEnabled(!isVideoEnabled);
-      
-      wsRef.current?.send(JSON.stringify({
-        type: 'audioVideoState',
-        isVideoEnabled: !isVideoEnabled,
-        isAudioEnabled
-      }));
+ const toggleVideo = useCallback(() => {
+  if (localStream) {
+    localStream.getVideoTracks().forEach(track => {
+      track.enabled = !isVideoEnabled;
+    });
+    setIsVideoEnabled(!isVideoEnabled);
+
+    // Update the localStream object
+    if (isVideoEnabled) {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+          setLocalStream(stream);
+        })
+        .catch(error => {
+          console.error('Error getting user media:', error);
+        });
+    } else {
+      setLocalStream(null);
     }
-  }, [localStream, isVideoEnabled, isAudioEnabled]);
+
+    // ...
+  }
+}, [localStream, isVideoEnabled]);
 
   const toggleAudio = useCallback(() => {
     if (localStream) {
@@ -573,13 +574,12 @@ const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
           handleStopScreenShare();
         };
 
-        const videoTrack = screenStream.getVideoTracks()[0];
         participants.forEach(participant => {
           const sender = participant.peerConnection
             .getSenders()
             .find(s => s.track?.kind === 'video');
           if (sender) {
-            sender.replaceTrack(videoTrack);
+            sender.replaceTrack(screenStream.getVideoTracks()[0]);
           }
         });
 
@@ -602,14 +602,13 @@ const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { deviceId: selectedVideoDevice || undefined } 
       });
-      const videoTrack = stream.getVideoTracks()[0];
       
       participants.forEach(participant => {
         const sender = participant.peerConnection
           .getSenders()
           .find(s => s.track?.kind === 'video');
         if (sender) {
-          sender.replaceTrack(videoTrack);
+          sender.replaceTrack(stream.getVideoTracks()[0]);
         }
       });
       
@@ -619,15 +618,16 @@ const VideoConference: React.FC<{ roomid: string }> = ({ roomid }) => {
     }
   };
 
-  const handleLeaveMeeting = () => {
-    participants.forEach(participant => {
-      participant.peerConnection.close();
-    });
-    
-    localStream?.getTracks().forEach(track => track.stop());
+  const handleLeaveMeeting = useCallback(() => {
+    // Close the localStream object
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      setLocalStream(null);
+    }
+
     wsRef.current?.close();
-    router.push('/dashboard');
-  };
+    router.push('/chat');
+  }, [localStream, router, wsRef]);
 
   // Render functions
   const renderParticipantVideo = (participant: Participant) => (

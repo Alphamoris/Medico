@@ -1,3 +1,30 @@
-backend/virenv/
-backend/.env
-backend/alembic.ini
+# Backend specific ignores
+backend/virenv/        # Virtual environment directory
+backend/.env          # Environment variables file
+backend/alembic.ini   # Alembic configuration file
+
+# Python specific ignores
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+
+# IDE specific ignores
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment specific ignores
+.env
+.venv
+
+env/
+venv/
+ENV/
+
+# Database specific ignores
+*.sqlite3
+*.db

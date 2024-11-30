@@ -5,3 +5,5 @@ passlib
 bcrypt
 alembic
 PyJWT
+requests
+dotenv

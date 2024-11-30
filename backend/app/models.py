@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import DateTime, Float, Column, Integer, String, Boolean, ForeignKey, ARRAY, Text
+from sqlalchemy import JSON, DateTime, Float, Column, Integer, String, Boolean, ForeignKey, ARRAY, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -115,3 +115,82 @@ class DoctorModel(Base):
     hospital_affiliations = Column(ARRAY(String), nullable=False)  # Assuming hospital affiliations are stored as an array of strings
 
 #---------------------END---------------------------------
+
+
+#--------------------Websocket & Chat---------------------------------
+
+class RoomModel(Base):
+    __tablename__ = 'rooms'
+    id = Column(Integer , unique= False , nullable= False)
+    room_name = Column(String , nullable= False )
+    join_code = Column(Integer, primary_key=True, comment="This is a 6 digit unique join code")
+    password = Column(String)
+    last_activity = Column(DateTime)
+    class Config:
+        orm_mode = True
+
+class ParticipantModel(Base):
+    __tablename__ = 'participants'
+    id = Column(Integer, primary_key=True ,nullable=False)
+    join_code   = Column(Integer, ForeignKey('rooms.join_code'))
+
+class WebRTCOfferModel(Base):
+    __tablename__ = 'webrtc_offers'
+    id = Column(Integer, primary_key=True)
+    join_code = Column(Integer, ForeignKey('rooms.join_code'))
+    offer_id = Column(String)
+    offer_details = Column(JSON)
+    expires_at = Column(DateTime)
+
+#--------------------Room---------------------------------
+
+# class RoomModel(Base):
+#     """SQLAlchemy model for storing room information"""
+#     __tablename__ = 'rooms'
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     room_id = Column(String, unique=True, index=True, nullable=False)
+#     created_at = Column(DateTime, default=datetime.utcnow)
+#     last_activity = Column(DateTime, default=datetime.utcnow)
+#     max_participants = Column(Integer, default=10)  # Added max participants limit
+#     is_locked = Column(Boolean, default=False)  # Added room locking capability
+
+# class ParticipantModel(Base):
+#     """SQLAlchemy model for storing participant information"""
+#     __tablename__ = 'participants'
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     client_id = Column(String, nullable=False, index=True)
+#     room_id = Column(String, nullable=False, index=True)
+#     joined_at = Column(DateTime, default=datetime.now)
+#     left_at = Column(DateTime, nullable=True)
+#     connection_status = Column(String, default='connected')  # Track connection state
+#     last_heartbeat = Column(DateTime, nullable=False, default=datetime.now)  # For detecting stale connections
+
+# class MessageModel(Base):
+#     """SQLAlchemy model for storing chat messages"""
+#     __tablename__ = 'messages'
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     room_id = Column(String, nullable=False, index=True)
+#     client_id = Column(String, nullable=False)
+#     content = Column(Text, nullable=False)
+#     timestamp = Column(DateTime, default=datetime.utcnow)
+#     message_type = Column(String, nullable=False)
+#     delivered = Column(Boolean, default=False)  # Track message delivery
+#     error = Column(String, nullable=True)  # Store any delivery errors
+
+# class WebRTCOfferModel(Base):
+#     """SQLAlchemy model for storing WebRTC offers"""
+#     __tablename__ = 'webrtc_offers'
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     room_id = Column(String, nullable=False, index=True)
+#     offer_id = Column(String, unique=True, nullable=False)
+#     offer_details = Column(JSON, nullable=False)
+#     created_at = Column(DateTime, default=datetime.utcnow)
+#     expires_at = Column(DateTime)  # Added offer expiration
+#     status = Column(String, default='pending')  # Track offer status
+
+
+#---------------------END--------------------------------- 

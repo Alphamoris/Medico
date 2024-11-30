@@ -16,10 +16,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
 
   // Define routes to exclude from layout
-  const excludedRoutes = ['/authenticate/login', '/authenticate/signup', '/404' , "/websockets/[roomid]"];
+  const excludedRoutes = ['/authenticate/login', '/authenticate/signup', '/404'];
 
   // Check if current route should be excluded
-  const isExcluded = excludedRoutes.includes(pathname);
+  const isExcluded = excludedRoutes.includes(pathname) || pathname.startsWith('/websockets/');
 
   // Conditional rendering based on route
   return (
