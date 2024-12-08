@@ -2,7 +2,7 @@ import apiInstance from './ApiInstance';
 
 export const getMedicines = async (): Promise<any> => {
     try {
-        const response = await apiInstance.get("/medicines", {
+        const response = await apiInstance.get("/medicines/", {
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -16,7 +16,7 @@ export const getMedicines = async (): Promise<any> => {
 
 export const getFeed = async (): Promise<any> => {
     try {
-        const response = await apiInstance.get("/feed", {
+        const response = await apiInstance.get("/feed/", {
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -30,7 +30,7 @@ export const getFeed = async (): Promise<any> => {
 
 export const getDoctors = async (): Promise<any> => {
     try {
-        const response = await apiInstance.get("/finddoctors", {
+        const response = await apiInstance.get("/finddoctors/", {
             headers: {
                 'Content-Type': 'application/json'
             }

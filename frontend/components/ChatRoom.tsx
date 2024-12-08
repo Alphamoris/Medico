@@ -10,39 +10,7 @@ import { selectJWTToken } from "@/Redux/jwtSlice";
 import { getRoom, deleteRoom, getRoombyJoinCode } from "@/apilib/ApiGet";
 import { setRooms, selectRooms } from "@/Redux/RoomSlice";
 import { AppDispatch, RootState } from "@/Redux/Store";
-
-interface Room {
-  id: string;
-  name: string;
-  password: string;
-  createdTime: string;
-  createdDate: string;
-  participants: number;
-  quality: string;
-  isPrivate: boolean;
-  maxParticipants: number;
-  dataUsage?: string;
-  joinCode: string;
-  lastActivity?: Date;
-}
-
-interface DecodedToken {
-  exp: number;
-  u_id: number;
-}
-
-interface RoomData {
-  join_code: number;
-  password: string;
-  room_name: string;
-  date: string;
-  time: string;
-}
-
-interface RoomState {
-  joinCode: string;
-  password: string;
-}
+import { Room, DecodedToken, RoomData, RoomState } from "@/interface";
 
 const ChatRoom: React.FC = () => {
   const router = useRouter();

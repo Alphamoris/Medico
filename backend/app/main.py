@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app import rooms , ai
+from app import rooms , ai , feedback
 from . import authentication , medicines , feed , finddoctors , ws_wrtc 
 app=FastAPI()
 
@@ -22,3 +22,4 @@ app.include_router(finddoctors.router , prefix= "/finddoctors")
 app.include_router(ws_wrtc.router , prefix= "/websockets")
 app.include_router(rooms.router , prefix= "/rooms")
 app.include_router(ai.router , prefix= "/ai")
+app.include_router(feedback.router , prefix= "/feedback")

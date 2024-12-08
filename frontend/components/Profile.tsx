@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { User, Settings, LogOut, Bell, Calendar, Activity, Heart, FileText, AlertCircle, ChevronRight, Mail, Phone, MapPin, Edit, UserPlus, Stethoscope, Pill, Hospital, Shield, Briefcase } from 'lucide-react';
+import { User, Settings, LogOut, Bell, Calendar, Activity, Heart, FileText, AlertCircle, ChevronRight, Mail, Phone, MapPin, Edit, UserPlus, Stethoscope, Pill, Hospital, Shield, Briefcase, Menu } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -191,6 +191,7 @@ const ProfileComponent: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const loadProfileData = async () => {
@@ -246,34 +247,29 @@ const ProfileComponent: React.FC = () => {
 
   const getMockProfileData = async (): Promise<ProfileInfo> => {
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (Math.random() > 0.8) {
-      throw new Error('Random error simulation');
-    }
-
     return {
       basic: {
         firstName: 'Sarah',
         lastName: 'Johnson',
         dateOfBirth: '1992-07-15',
-        age: 31,
+        age: 21,
         gender: 'Female',
-        phoneNumber: '(555) 123-4567',
+        phoneNumber: '+91 7010815310',
         email: 'sarah.johnson@email.com',
         bloodGroup: 'O+',
         maritalStatus: 'Single',
-        nationality: 'American'
+        nationality: 'Indian'
       },
       address: {
         street: '123 Health Street',
-        city: 'Wellness City',
-        state: 'CA',
-        zipCode: '90210'
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        zipCode: '400001'
       },
       emergencyContact: {
         name: 'John Johnson',
         relationship: 'Brother',
-        phone: '(555) 987-6543'
+        phone: '+91 7010815310'
       },
       medicalHistory: {
         conditions: ['Asthma', 'Seasonal Allergies'],
@@ -303,7 +299,7 @@ const ProfileComponent: React.FC = () => {
         diet: 'Balanced',
         sleepHours: 7.5,
         stressLevel: 'Moderate',
-        occupation: 'Teacher',
+        occupation: 'Software Engineer',
         hobbies: ['Yoga', 'Reading', 'Hiking']
       },
       lastCheckup: '2023-11-15',
@@ -315,7 +311,7 @@ const ProfileComponent: React.FC = () => {
 
   const handleLogout = () => {
     dispatch(setIsLoggedIn(false));
-    router.push('/login');
+    router.push('/authenticate/login');
   };
 
   const handleEditSection = (section: EditableSection) => {
@@ -506,22 +502,40 @@ const ProfileComponent: React.FC = () => {
             </div>
           </div>
         );
-      // Add cases for other sections as needed
       default:
         return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-teal-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <Image src="/logo.ico" alt="Medico Logo" width={40} height={40} />
-            <h1 className="text-3xl font-bold text-teal-700">Medico</h1>
+    <div className="min-h-screen bg-indigo-100">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white border-b border-indigo-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-2">
+              <Image src="/logo.ico" alt="Medico Logo" width={40} height={40} />
+              <h1 className="text-2xl sm:text-3xl font-bold text-teal-700">Medico</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="md:hidden"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+              <Button variant="destructive" className="hidden md:flex bg-teal-600 hover:bg-teal-700" onClick={() => setShowLogoutDialog(true)}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
+      </header>
 
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
@@ -532,9 +546,17 @@ const ProfileComponent: React.FC = () => {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : (
-          <div className="flex gap-6">
-            <div className="w-72 bg-white rounded-lg shadow-lg p-6 h-[calc(100vh-2rem)] sticky top-4">
-              <div className="mb-8 text-center">
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Sidebar */}
+            <aside className={`
+              md:w-72 bg-white rounded-lg shadow-lg p-6
+              fixed md:sticky md:top-24 md:h-[calc(100vh-7rem)]
+              inset-0 z-40 transform md:transform-none
+              ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+              transition-transform duration-200 ease-in-out
+              md:translate-x-0
+            `}>
+              <div className="mb-8 text-center  mt-20 sm:mt-0">
                 <div className="relative mx-auto w-32 h-32 mb-4 group">
                   <Avatar className="w-32 h-32 border-4 border-teal-100">
                     <AvatarImage src="/avatar-placeholder.png" alt={`${profileInfo.basic.firstName} ${profileInfo.basic.lastName}`} />
@@ -573,93 +595,136 @@ const ProfileComponent: React.FC = () => {
                   <p className="text-sm text-teal-600 mt-2">Profile Completion: {Math.round(profileCompletion)}%</p>
                 </div>
               </div>
-            
-              <div className="pt-4 border-t mt-4">
-                <Button variant="destructive" className="w-full bg-red-500 hover:bg-red-600" onClick={() => setShowLogoutDialog(true)}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </Button>
-              </div>
-            </div>
+            </aside>
 
-            <div className="flex-1 space-y-6">
+            {/* Main Content */}
+            <div className="flex-1 space-y-6 md:mt-0 mt-4">
               <Card className="border-teal-100">
                 <CardHeader className="bg-teal-50">
                   <div className="flex justify-between items-center">
-                    <CardTitle className="text-2xl font-bold text-teal-800">Basic Information</CardTitle>
+                    <CardTitle className="text-xl sm:text-2xl font-semibold text-teal-800">Basic Information</CardTitle>
                     <Button variant="outline" size="sm" onClick={() => handleEditSection('basic')} className="text-teal-600 border-teal-600 hover:bg-teal-50" aria-label="Edit Basic Information">
                       <Edit className="w-4 h-4 mr-2" />
-                      Edit
+                      <span className="hidden sm:inline">Edit</span>
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6">
                   <div>
-                    <Label>First Name</Label>
-                    <p>{profileInfo.basic.firstName}</p>
+                    <Label className="text-sm font-medium text-gray-500">First Name</Label>
+                    <p className="mt-1">{profileInfo.basic.firstName}</p>
                   </div>
                   <div>
-                    <Label>Last Name</Label>
-                    <p>{profileInfo.basic.lastName}</p>
+                    <Label className="text-sm font-medium text-gray-500">Last Name</Label>
+                    <p className="mt-1">{profileInfo.basic.lastName}</p>
                   </div>
                   <div>
-                    <Label>Email</Label>
-                    <p>{profileInfo.basic.email}</p>
+                    <Label className="text-sm font-medium text-gray-500">Email</Label>
+                    <p className="mt-1">{profileInfo.basic.email}</p>
                   </div>
                   <div>
-                    <Label>Phone Number</Label>
-                    <p>{profileInfo.basic.phoneNumber}</p>
+                    <Label className="text-sm font-medium text-gray-500">Phone Number</Label>
+                    <p className="mt-1">{profileInfo.basic.phoneNumber}</p>
                   </div>
                   <div>
-                    <Label>Age</Label>
-                    <p>{profileInfo.basic.age}</p>
+                    <Label className="text-sm font-medium text-gray-500">Age</Label>
+                    <p className="mt-1">{profileInfo.basic.age}</p>
                   </div>
                   <div>
-                    <Label>Blood Group</Label>
-                    <p>{profileInfo.basic.bloodGroup}</p>
+                    <Label className="text-sm font-medium text-gray-500">Blood Group</Label>
+                    <p className="mt-1">{profileInfo.basic.bloodGroup}</p>
                   </div>
                   <div>
-                    <Label>Marital Status</Label>
-                    <p>{profileInfo.basic.maritalStatus}</p>
+                    <Label className="text-sm font-medium text-gray-500">Marital Status</Label>
+                    <p className="mt-1">{profileInfo.basic.maritalStatus}</p>
                   </div>
                   <div>
-                    <Label>Nationality</Label>
-                    <p>{profileInfo.basic.nationality}</p>
+                    <Label className="text-sm font-medium text-gray-500">Nationality</Label>
+                    <p className="mt-1">{profileInfo.basic.nationality}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-teal-100">
+                <CardHeader className="bg-teal-50">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-xl sm:text-2xl font-bold text-teal-800">Medical Information</CardTitle>
+                    <Button variant="outline" size="sm" onClick={() => handleEditSection('medicalHistory')} className="text-teal-600 border-teal-600 hover:bg-teal-50" aria-label="Edit Medical Information">
+                      <Edit className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Edit</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Medical Conditions</Label>
+                    <p className="mt-1">{profileInfo.medicalHistory.conditions.join(', ')}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Allergies</Label>
+                    <p className="mt-1">{profileInfo.medicalHistory.allergies.join(', ')}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Current Medications</Label>
+                    <p className="mt-1">{profileInfo.medicalHistory.medications.join(', ')}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Past Surgeries</Label>
+                    <p className="mt-1">{profileInfo.medicalHistory.surgeries.join(', ')}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Family History</Label>
+                    <p className="mt-1">{profileInfo.medicalHistory.familyHistory.join(', ')}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Height</Label>
+                    <p className="mt-1">{profileInfo.medicalHistory.height}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Weight</Label>
+                    <p className="mt-1">{profileInfo.medicalHistory.weight}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">BMI</Label>
+                    <p className="mt-1">{profileInfo.medicalHistory.bmi}</p>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </div>
         )}
+      </main>
 
-        <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>
-              <AlertDialogDescription>
-                You will need to log in again to access your profile.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="border-teal-600 text-teal-600">Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleLogout} className="bg-teal-600 hover:bg-teal-700">Logout</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      {/* Dialogs */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will need to log in again to access your profile.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-teal-600 text-teal-600">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} className="bg-teal-600 hover:bg-teal-700">Logout</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="bg-white">
-            <DialogHeader>
-              <DialogTitle className="text-teal-800">Edit {editSection}</DialogTitle>
-            </DialogHeader>
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="bg-white sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-teal-800">Edit {editSection}</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh]">
             {renderEditFields()}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowEditDialog(false)} className="border-teal-600 text-teal-600">Cancel</Button>
-              <Button onClick={handleSaveEdit} className="bg-teal-600 hover:bg-teal-700">Save Changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="border-teal-600 text-teal-600">Cancel</Button>
+            <Button onClick={handleSaveEdit} className="bg-teal-600 hover:bg-teal-700">Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

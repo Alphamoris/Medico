@@ -4,24 +4,11 @@ from datetime import datetime, time
 from app.models import RoomModel, ParticipantModel
 from sqlalchemy.orm import Session
 from app.database import get_db
+from .schema import RoomCreate, ParticipantCreate, SendRoomDetails
 
 router = APIRouter()
 
-class RoomCreate(BaseModel):
-    id : int 
-    join_code: int
-    password: str
-    room_name: str
-class ParticipantCreate(BaseModel):
-    join_code: int
 
-
-class SendRoomDetails(BaseModel):
-    join_code: int
-    password: str   
-    room_name: str
-    date: str
-    time: str
 
 @router.get("/get_room_details", response_model=list[SendRoomDetails])
 async def get_room_details(id: int, db: Session = Depends(get_db)):

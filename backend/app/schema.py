@@ -83,13 +83,31 @@ class Doctor(BaseModel):
     hospitalAffiliations: List[str]
 
 
+class Feedbackcls(BaseModel):
+    id: int | None = None
+    feedback: str
+    name: str
+    email: EmailStr
 
 
 
 
 
+class RoomCreate(BaseModel):
+    id : int 
+    join_code: int
+    password: str
+    room_name: str
+class ParticipantCreate(BaseModel):
+    join_code: int
 
 
+class SendRoomDetails(BaseModel):
+    join_code: int
+    password: str   
+    room_name: str
+    date: str
+    time: str
 
 
 

@@ -47,7 +47,13 @@ class RoomManager:
     def __init__(self):
         self.rooms: Dict[int, Dict] = {}
         self.inactive_room_check_interval = 300  # 5 minutes
-        asyncio.create_task(self._cleanup_inactive_rooms())
+        # Remove automatic task creation since there's no event loop yet
+        self.cleanup_task = None
+
+    async def start_cleanup_task(self):
+        """Start the cleanup task when an event loop is available"""
+        if self.cleanup_task is None:
+            self.cleanup_task = asyncio.create_task(self._cleanup_inactive_rooms())
 
     def verify_room(self, db: Session, join_code: int, password: str) -> Optional[RoomModel]:
         """Verify room exists and password matches"""
@@ -118,6 +124,9 @@ async def websocket_endpoint(
     password: str,
     db: Session = Depends(get_db)
 ):
+    # Start cleanup task when first websocket connects
+    await room_manager.start_cleanup_task()
+    
     client_id = None
     ping_task = None
     

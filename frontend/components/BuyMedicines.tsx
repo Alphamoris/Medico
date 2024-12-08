@@ -29,45 +29,21 @@ import {
   Calendar,
   Factory,
   Pill,
-  Grid
+  Grid,
+  Baby
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { getMedicines } from '@/apilib/ApiGet';
 
-// Types
-export interface Medicine {
-  id: number;
-  name: string;
-  price: number;
-  category: string;
-  stock: number;
-  description?: string;
-  dosage?: string;
-  requires_prescription: boolean;
-  rating?: number;
-  reviews?: number;
-  discount?: number;
-  expiry?: string;
-  manufacturer?: string;
-}
-
-interface CartItem extends Medicine {
-  quantity: number;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-}
+import { Medicine, CartItem, Category } from '@/interface';
 
 const categories: Category[] = [
   { id: 'all', name: 'All', icon: <Grid className="h-4 w-4" /> },
   { id: 'general', name: 'General', icon: <Package className="h-4 w-4" /> },
-  { id: 'cardiology', name: 'Heart', icon: <Heart className="h-4 w-4" /> },
-  { id: 'orthopedic', name: 'Bone', icon: <Tag className="h-4 w-4" /> },
-];
+  { id: 'cardiology', name: 'Cardiology', icon: <Heart className="h-4 w-4" /> },
+  { id: 'orthopedic', name: 'Orthopedic', icon: <Tag className="h-4 w-4" /> },
+  ];
 
 const BuyMedicine: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -106,13 +82,13 @@ const BuyMedicine: React.FC = () => {
         const categorizedMedicines = {
           all: response,
           general: response.filter((med: Medicine) => 
-            ['Pain Relief', 'Antibiotics', 'Antacids'].includes(med.category)
+            ['general'].includes(med.category)
           ),
           cardiology: response.filter((med: Medicine) => 
-            ['Blood Thinners', 'Blood Pressure', 'Heart Health'].includes(med.category)
+            ['cardiology'].includes(med.category)
           ),
           orthopedic: response.filter((med: Medicine) => 
-            ['Supplements', 'Bone Health', 'Joint Pain'].includes(med.category)
+            ['orthopedic'].includes(med.category)
           )
         };
 

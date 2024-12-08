@@ -142,55 +142,17 @@ class WebRTCOfferModel(Base):
     offer_details = Column(JSON)
     expires_at = Column(DateTime)
 
-#--------------------Room---------------------------------
-
-# class RoomModel(Base):
-#     """SQLAlchemy model for storing room information"""
-#     __tablename__ = 'rooms'
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     room_id = Column(String, unique=True, index=True, nullable=False)
-#     created_at = Column(DateTime, default=datetime.utcnow)
-#     last_activity = Column(DateTime, default=datetime.utcnow)
-#     max_participants = Column(Integer, default=10)  # Added max participants limit
-#     is_locked = Column(Boolean, default=False)  # Added room locking capability
-
-# class ParticipantModel(Base):
-#     """SQLAlchemy model for storing participant information"""
-#     __tablename__ = 'participants'
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     client_id = Column(String, nullable=False, index=True)
-#     room_id = Column(String, nullable=False, index=True)
-#     joined_at = Column(DateTime, default=datetime.now)
-#     left_at = Column(DateTime, nullable=True)
-#     connection_status = Column(String, default='connected')  # Track connection state
-#     last_heartbeat = Column(DateTime, nullable=False, default=datetime.now)  # For detecting stale connections
-
-# class MessageModel(Base):
-#     """SQLAlchemy model for storing chat messages"""
-#     __tablename__ = 'messages'
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     room_id = Column(String, nullable=False, index=True)
-#     client_id = Column(String, nullable=False)
-#     content = Column(Text, nullable=False)
-#     timestamp = Column(DateTime, default=datetime.utcnow)
-#     message_type = Column(String, nullable=False)
-#     delivered = Column(Boolean, default=False)  # Track message delivery
-#     error = Column(String, nullable=True)  # Store any delivery errors
-
-# class WebRTCOfferModel(Base):
-#     """SQLAlchemy model for storing WebRTC offers"""
-#     __tablename__ = 'webrtc_offers'
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     room_id = Column(String, nullable=False, index=True)
-#     offer_id = Column(String, unique=True, nullable=False)
-#     offer_details = Column(JSON, nullable=False)
-#     created_at = Column(DateTime, default=datetime.utcnow)
-#     expires_at = Column(DateTime)  # Added offer expiration
-#     status = Column(String, default='pending')  # Track offer status
+#---------------------END---------------------------------
 
 
-#---------------------END--------------------------------- 
+#--------------------Feedback---------------------------------
+
+class Feedback(Base):
+    __tablename__ = 'feedback'
+    id = Column(Integer, primary_key=True , autoincrement=True , nullable=True)
+    name = Column(String)
+    email = Column(String)
+    feedback = Column(String)
+
+#---------------------END---------------------------------
+

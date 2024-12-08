@@ -31,6 +31,7 @@ import { format, addDays, isSameDay } from 'date-fns';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 import { getDoctors } from '@/apilib/ApiGet';
+import { Doctor , DoctorCardProps } from '@/interface';
 
 const FindDoctor = () => {
   const [selectedSpeciality, setSelectedSpeciality] = useState('All');
@@ -112,37 +113,6 @@ const FindDoctor = () => {
     Array.from({length: 14}, (_, i) => addDays(new Date(), i)),
     []
   );
-
-  interface Doctor {
-    id: number;
-    name: string;
-    speciality: string;
-    rating: number;
-    reviews: number;
-    experience: string;
-    image: string;
-    nextAvailable: string;
-    location: string;
-    patients: string;
-    education: string;
-    languages: Array<{ id: string; name: string }>;
-    consultationFee: number;
-    availability: string[];
-    verified: boolean;
-    awards: number;
-    bio: string;
-    timeSlots: {
-      morning: Array<{ time: string; available: boolean }>;
-      evening: Array<{ time: string; available: boolean }>;
-    };
-    specializations: string[];
-    insuranceAccepted: string[];
-    hospitalAffiliations: string[];
-  }
-
-  interface DoctorCardProps {
-    doctor: Doctor;
-  }
 
   const toggleFavorite = useCallback((doctorId: number): void => {
     setFavoriteIds(prev => 
@@ -642,23 +612,3 @@ const FindDoctor = () => {
 export default FindDoctor;
 
 
-// INSERT INTO doctors (name, speciality, rating, reviews, experience, image, next_available, location, patients, education, languages, consultation_fee, availability, verified, awards, bio, time_slots, specializations, insurance_accepted, hospital_affiliations) VALUES
-// ('Dr. Benjamin Foster', 'Cardiologist', 4.9, 425, '22 years', '/logo.ico', 'Today', 'Cleveland Clinic', '5000+', 'MD - Cardiology, Yale School of Medicine', ARRAY['English', 'German'], 450.00, ARRAY['Mon', 'Wed', 'Thu'], true, 8, 'Pioneer in advanced cardiac imaging and minimally invasive procedures. Former Chief of Cardiology at Mayo Clinic.', ARRAY['08:00', '10:00', '14:00', '16:00'], ARRAY['Interventional Cardiology', 'Advanced Heart Failure', 'Cardiac Imaging'], ARRAY['Blue Cross', 'Aetna', 'United Healthcare', 'Cigna'], ARRAY['Cleveland Clinic', 'Johns Hopkins']),
-
-// ('Dr. Alexandra Chen', 'Neurologist', 4.95, 380, '20 years', '/logo.ico', 'Tomorrow', 'Massachusetts General Hospital', '4500+', 'MD - Neurology, Harvard Medical School', ARRAY['English', 'Mandarin', 'French'], 500.00, ARRAY['Tue', 'Thu', 'Fri'], true, 6, 'Leading researcher in neurodegenerative diseases. Published over 100 peer-reviewed papers.', ARRAY['09:00', '11:00', '15:00', '17:00'], ARRAY['Movement Disorders', 'Neurodegenerative Diseases', 'Neuro-oncology'], ARRAY['Blue Shield', 'Medicare', 'Humana'], ARRAY['Mass General', 'Brigham and Women''s Hospital']),
-
-// ('Dr. Victoria Reynolds', 'Pediatrician', 4.9, 520, '18 years', '/logo.ico', 'Today', 'Boston Children''s Hospital', '6000+', 'MD - Pediatrics, Stanford University', ARRAY['English', 'Spanish'], 350.00, ARRAY['Mon', 'Tue', 'Wed', 'Fri'], true, 5, 'Specializes in pediatric developmental disorders. Former president of American Academy of Pediatrics.', ARRAY['08:30', '10:30', '14:30', '16:30'], ARRAY['Developmental Pediatrics', 'Behavioral Health', 'Chronic Disease Management'], ARRAY['Aetna', 'United Healthcare', 'Cigna'], ARRAY['Boston Children''s Hospital', 'Dana-Farber Cancer Institute']),
-
-// ('Dr. Richard Martinez', 'Orthopedic', 4.95, 450, '25 years', '/logo.ico', 'Next Week', 'Hospital for Special Surgery', '4800+', 'MD - Orthopedic Surgery, Johns Hopkins', ARRAY['English', 'Spanish'], 600.00, ARRAY['Mon', 'Wed', 'Thu'], true, 7, 'Pioneering surgeon in joint replacement. Team physician for multiple professional sports teams.', ARRAY['07:30', '09:30', '13:30', '15:30'], ARRAY['Sports Medicine', 'Joint Replacement', 'Spine Surgery'], ARRAY['Blue Cross', 'Cigna', 'Oxford'], ARRAY['HSS', 'NewYork-Presbyterian']),
-
-// ('Dr. Sarah Thompson', 'Dermatologist', 4.85, 390, '16 years', '/logo.ico', 'Tomorrow', 'Stanford Dermatology Center', '3500+', 'MD - Dermatology, University of Pennsylvania', ARRAY['English'], 400.00, ARRAY['Tue', 'Thu', 'Fri'], true, 4, 'Leading expert in melanoma treatment and cosmetic dermatology. NIH-funded researcher.', ARRAY['09:00', '11:00', '14:00', '16:00'], ARRAY['Skin Cancer', 'Cosmetic Dermatology', 'Laser Surgery'], ARRAY['Aetna', 'Blue Shield', 'United Healthcare'], ARRAY['Stanford Hospital', 'UCSF Medical Center']),
-
-// ('Dr. James Harrison', 'Cardiologist', 4.9, 480, '24 years', '/logo.ico', 'Today', 'Mount Sinai Heart', '5500+', 'MD - Cardiology, Columbia University', ARRAY['English', 'Italian'], 475.00, ARRAY['Mon', 'Wed', 'Fri'], true, 9, 'Renowned expert in structural heart disease. Pioneer in TAVR procedures.', ARRAY['08:00', '10:00', '13:00', '15:00'], ARRAY['Structural Heart Disease', 'Interventional Cardiology', 'Heart Failure'], ARRAY['Empire', 'United Healthcare', 'Aetna'], ARRAY['Mount Sinai', 'NYU Langone']),
-
-// ('Dr. Michelle Park', 'Neurologist', 4.85, 360, '19 years', '/logo.ico', 'Tomorrow', 'UCSF Medical Center', '4000+', 'MD - Neurology, Stanford University', ARRAY['English', 'Korean'], 450.00, ARRAY['Tue', 'Thu', 'Fri'], true, 5, 'Specializes in multiple sclerosis and neuroimmunology. Leading clinical researcher.', ARRAY['09:30', '11:30', '14:30', '16:30'], ARRAY['Multiple Sclerosis', 'Neuroimmunology', 'Headache Medicine'], ARRAY['Blue Shield', 'Anthem', 'United Healthcare'], ARRAY['UCSF Medical Center', 'Stanford Hospital']),
-
-// ('Dr. Robert Williams', 'Orthopedic', 4.9, 410, '21 years', '/logo.ico', 'Next Week', 'Mayo Clinic', '4200+', 'MD - Orthopedic Surgery, Duke University', ARRAY['English'], 550.00, ARRAY['Mon', 'Tue', 'Thu'], true, 6, 'Internationally recognized spine surgeon. Developer of minimally invasive techniques.', ARRAY['08:00', '10:00', '14:00', '16:00'], ARRAY['Spine Surgery', 'Minimally Invasive Surgery', 'Complex Reconstruction'], ARRAY['Blue Cross', 'United Healthcare', 'Medica'], ARRAY['Mayo Clinic', 'Methodist Hospital']),
-
-// ('Dr. Emily Anderson', 'Pediatrician', 4.95, 490, '17 years', '/logo.ico', 'Today', 'Nationwide Children''s Hospital', '5800+', 'MD - Pediatrics, Washington University', ARRAY['English', 'French'], 375.00, ARRAY['Mon', 'Wed', 'Thu', 'Fri'], true, 4, 'Expert in pediatric critical care. Published author on childhood development.', ARRAY['08:30', '10:30', '13:30', '15:30'], ARRAY['Critical Care', 'Neonatal Care', 'Emergency Medicine'], ARRAY['Anthem', 'United Healthcare', 'Cigna'], ARRAY['Nationwide Children''s', 'Ohio State Medical Center']),
-
-// ('Dr. Daniel Kim', 'Dermatologist', 4.9, 370, '18 years', '/logo.ico', 'Tomorrow', 'UCLA Dermatology', '3800+', 'MD - Dermatology, Harvard Medical School', ARRAY['English', 'Korean', 'Spanish'], 425.00, ARRAY['Tue', 'Wed', 'Fri'], true, 5, 'Leading authority in ethnic skin care and advanced laser treatments. UCLA Clinical Professor.', ARRAY['09:00', '11:00', '14:00', '16:00'], ARRAY['Cosmetic Dermatology', 'Laser Surgery', 'Ethnic Skin Care'], ARRAY['Blue Shield', 'Cigna', 'Kaiser'], ARRAY['UCLA Medical Center', 'Cedars-Sinai']);

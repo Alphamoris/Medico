@@ -1,7 +1,7 @@
 import React from "react";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { FaUserDoctor } from "react-icons/fa6";
-import { GiArtificialHive, GiMedicines } from "react-icons/gi";
+import { GiMedicines } from "react-icons/gi";
 import { CalendarDaysIcon, CircleUserRoundIcon, HistoryIcon, NewspaperIcon } from "lucide-react";
 import { BiSolidHome } from "react-icons/bi";
 

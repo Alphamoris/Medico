@@ -4,23 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from 'next/link';
 import Image from 'next/image';
-
-
-interface SocialLink {
-  icon: React.ReactNode;
-  href: string;
-  label: string;
-}
-
-interface QuickLink {
-  label: string;
-  href: string;
-}
-
-interface ServiceLink {
-  label: string;
-  href: string;
-}
+import { SocialLink, QuickLink, ServiceLink } from '@/interface';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();

@@ -1,9 +1,14 @@
 import VideoConference from "@/components/WSpage";
+import NoAuthDisplay from "@/components/NoAuthDisplay";
+import Loader from "@/components/Loader";
+import { Suspense } from "react";
 
-export default async function Page({ params }: { params: { roomid: string } }) {
+export default async function Page() {
   return (
-    <div>
-      <VideoConference />
-    </div>
+    <NoAuthDisplay>
+      <Suspense fallback={<Loader />}>
+        <VideoConference />
+      </Suspense>
+    </NoAuthDisplay>
   )
 }

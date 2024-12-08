@@ -16,20 +16,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from 'next/navigation'; // Changed to useRouter from 'next/navigation'
+import { Appointment } from '@/interface';
 
-interface Appointment {
-  id: string;
-  doctorName: string;
-  specialty: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  location: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
-  meetingType: 'online' | 'offline';
-  roomCode?: string;
-  roomPassword?: string;
-}
 
 const AppointmentComponent: React.FC = () => {
   
@@ -247,13 +235,7 @@ const AppointmentComponent: React.FC = () => {
                         {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                       </span>
                       <div className="flex gap-3">
-                        {appointment.status !== 'completed' && (
-                          <Link href={`/appointments/${appointment.id}`}>
-                            <Button variant="outline" size="sm" className="text-teal-600 hover:bg-teal-100 border-teal-300">
-                              View Details
-                            </Button>
-                          </Link>
-                        )}
+                        
                         {appointment.meetingType === 'online' && (
                           <Button 
                             variant="default" 

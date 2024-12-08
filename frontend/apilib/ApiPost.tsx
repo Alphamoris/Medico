@@ -20,3 +20,13 @@ export const postJoinRoom = async ( joinCode : number ): Promise<any> => {
     }
 };
 
+
+export const postFeedback = async ( formData : any ): Promise<any> => {
+    try {
+        const response = await apiInstance.post("/feedback/", { name: formData.name, email: formData.email, feedback: formData.message });
+        return response.data;
+    } catch (error) {
+        throw new Error;
+    }
+};
+

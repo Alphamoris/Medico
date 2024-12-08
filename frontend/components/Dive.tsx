@@ -80,7 +80,7 @@ const Dive = () => {
       const botMessage: Message = {
         id: Date.now() + 1,
         type: 'bot',
-        content: "I understand you're looking for assistance. This is a demo response - in a real implementation, I would be connected to an AI backend.",
+        content: "I've noticed some increased server-side traffic for this page, and I'm currently addressing it. Thank you for your patience!",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, botMessage]);
@@ -154,12 +154,12 @@ const Dive = () => {
         <div className="p-2.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-white" />
+              <div className={`${isFullScreen ? 'w-10 h-10' : 'w-7 h-7'} rounded-full bg-white/10 flex items-center justify-center`}>
+                <Bot className={`${isFullScreen ? 'w-6 h-6' : 'w-4 h-4'} text-white`} />
               </div>
               <div>
-                <h3 className="font-semibold text-white text-xs">Dive AI</h3>
-                <p className="text-[10px] text-white/80">
+                <h3 className={`font-semibold text-white ${isFullScreen ? 'text-lg' : 'text-xs'}`}>Dive AI</h3>
+                <p className={`${isFullScreen ? 'text-sm' : 'text-[10px]'} text-white/80`}>
                   {isTyping ? 'Typing...' : 'Online'}
                 </p>
               </div>
@@ -167,7 +167,7 @@ const Dive = () => {
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => setIsFullScreen(!isFullScreen)}
-                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                className={`p-1.5 hover:bg-white/10 rounded-lg transition-colors ${isFullScreen ? 'scale-125' : ''}`}
               >
                 {isFullScreen ? (
                   <Minimize2 className="w-4 h-4 text-white" />
@@ -181,7 +181,7 @@ const Dive = () => {
                   setIsOpen(false);
                   setShowGreeting(true);
                 }}
-                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                className={`p-1.5 hover:bg-white/10 rounded-lg transition-colors ${isFullScreen ? 'scale-125' : ''}`}
               >
                 <X className="w-4 h-4 text-white" />
               </button>
@@ -197,15 +197,15 @@ const Dive = () => {
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} 
                          ${index === 0 ? '' : 'mt-2'}`}
             >
-              <div className={`flex items-end space-x-1 max-w-[75%]`}>
+              <div className={`flex items-end space-x-1 ${isFullScreen ? 'max-w-[50%]' : 'max-w-[75%]'}`}>
                 <div className={`message-bubble p-2 rounded-xl 
                                 ${message.type === 'user'
                                   ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
                                   : 'bg-white text-gray-800 shadow-sm'
                                 }`}>
-                  <p className="text-xs whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                  <p className={`whitespace-pre-wrap leading-relaxed ${isFullScreen ? 'text-base' : 'text-xs'}`}>{message.content}</p>
                   <div className="flex justify-end mt-1">
-                    <span className={`text-[9px] ${
+                    <span className={`${isFullScreen ? 'text-xs' : 'text-[9px]'} ${
                       message.type === 'user' ? 'text-white/70' : 'text-gray-500'
                     }`}>
                       {new Date(message.timestamp).toLocaleTimeString([], {
@@ -219,13 +219,13 @@ const Dive = () => {
             </div>
           ))}
           {isTyping && (
-            <div className="flex items-center space-x-2 text-gray-500 text-xs p-2">
+            <div className={`flex items-center space-x-2 text-gray-500 ${isFullScreen ? 'text-base' : 'text-xs'} p-2`}>
               <div className="flex space-x-1">
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+                <div className={`${isFullScreen ? 'w-2 h-2' : 'w-1.5 h-1.5'} bg-gray-400 rounded-full animate-bounce`} />
+                <div className={`${isFullScreen ? 'w-2 h-2' : 'w-1.5 h-1.5'} bg-gray-400 rounded-full animate-bounce`} style={{ animationDelay: '0.2s' }} />
+                <div className={`${isFullScreen ? 'w-2 h-2' : 'w-1.5 h-1.5'} bg-gray-400 rounded-full animate-bounce`} style={{ animationDelay: '0.4s' }} />
               </div>
-              <span className="text-[10px]">Dive is typing...</span>
+              <span className={`${isFullScreen ? 'text-sm' : 'text-[10px]'}`}>Dive is typing...</span>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -238,8 +238,8 @@ const Dive = () => {
               <button 
               aria-label='button'
                 onClick={() => setShowEmoji(!showEmoji)}
-                className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors 
-                          rounded-lg hover:bg-gray-100"
+                className={`p-1.5 text-gray-400 hover:text-gray-600 transition-colors 
+                          rounded-lg hover:bg-gray-100 ${isFullScreen ? 'scale-125' : ''}`}
               >
                 <Smile className="w-4 h-4" />
               </button>
@@ -256,9 +256,9 @@ const Dive = () => {
                   }
                 }}
                 placeholder="Type your message..."
-                className="w-full px-3 py-1.5 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 
-                         focus:ring-purple-500 resize-none text-xs min-h-[32px] max-h-[100px]
-                         placeholder-gray-400 transition-shadow duration-200"
+                className={`w-full px-3 py-1.5 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 
+                         focus:ring-purple-500 resize-none ${isFullScreen ? 'text-base min-h-[40px]' : 'text-xs min-h-[32px]'} max-h-[100px]
+                         placeholder-gray-400 transition-shadow duration-200`}
                 style={{ overflow: 'hidden' }}
               />
             </div>
@@ -266,7 +266,7 @@ const Dive = () => {
             aria-label='button'
               onClick={handleSend}
               disabled={!inputValue.trim()}
-              className={`p-1.5 rounded-xl transition-all duration-200
+              className={`p-1.5 rounded-xl transition-all duration-200 ${isFullScreen ? 'scale-125' : ''}
                 ${inputValue.trim() 
                   ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:shadow-md hover:scale-105' 
                   : 'bg-gray-100 cursor-not-allowed'}`}
@@ -277,8 +277,8 @@ const Dive = () => {
 
           {/* Emoji Picker */}
           {showEmoji && (
-            <div className="absolute bottom-full mb-2 left-2 bg-white rounded-lg shadow-xl 
-                          border border-gray-200 p-2 w-48 max-h-36 overflow-y-auto">
+            <div className={`absolute bottom-full mb-2 left-2 bg-white rounded-lg shadow-xl 
+                          border border-gray-200 p-2 ${isFullScreen ? 'w-64 max-h-48' : 'w-48 max-h-36'} overflow-y-auto`}>
               <div className="grid grid-cols-6 gap-1">
                 {['😊', '😂', '❤️', '👍', '🎉', '🤔', '😎', '🙌', 
                   '👋', '🔥', '⭐', '💡'].map(emoji => (
@@ -288,7 +288,7 @@ const Dive = () => {
                       setInputValue(prev => prev + emoji);
                       setShowEmoji(false);
                     }}
-                    className="p-1 hover:bg-gray-100 rounded transition-colors text-sm"
+                    className={`p-1 hover:bg-gray-100 rounded transition-colors ${isFullScreen ? 'text-xl' : 'text-sm'}`}
                   >
                     {emoji}
                   </button>
@@ -299,10 +299,10 @@ const Dive = () => {
         </div>
 
         {/* Footer */}
-        <div className="px-3 py-1.5 bg-gradient-to-r from-gray-50 to-white border-t 
-                       border-gray-100 text-[9px] text-gray-400 flex justify-center items-center">
+        <div className={`px-3 py-1.5 bg-gradient-to-r from-gray-50 to-white border-t 
+                       border-gray-100 ${isFullScreen ? 'text-sm' : 'text-[9px]'} text-gray-400 flex justify-center items-center`}>
           <div className="flex items-center space-x-1">
-            <MessageSquare className="w-2.5 h-2.5" />
+            <MessageSquare className={`${isFullScreen ? 'w-4 h-4' : 'w-2.5 h-2.5'}`} />
             <span>Powered by Dive AI</span>
           </div>
         </div>

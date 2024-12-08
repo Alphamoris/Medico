@@ -9,28 +9,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from "@/components/hooks/use-toast"
 
-// Types
-interface Coordinates {
-  latitude: number;
-  longitude: number;
-}
-
-interface FormData {
-  name: string;
-  phone: string;
-  location: string;
-  coordinates: Coordinates | null;
-  emergencyType: 'medical' | 'accident' | 'other';
-  additionalNotes: string;
-  timestamp : string | null ;
-}
-
-interface EmergencyResponse {
-  success: boolean;
-  estimatedTime: number;
-  emergencyId?: string;
-  nearestHospital?: string;
-}
+import { FormData, EmergencyResponse } from '@/interface';
 
 // Constants
 const EMERGENCY_QUOTES = [

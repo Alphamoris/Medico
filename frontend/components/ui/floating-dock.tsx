@@ -42,8 +42,13 @@ const FloatingDockMobile = ({
   className?: string;
 }) => {
   const [open, setOpen] = useState(false);
+
+  const handleItemClick = () => {
+    setOpen(false);
+  };
+
   return (
-    <div className={cn("relative block md:hidden bg-purple-300", className)}>
+    <div className={cn("relative block md:hidden", className)}>
       <AnimatePresence>
         {open && (
           <motion.div
@@ -70,6 +75,7 @@ const FloatingDockMobile = ({
                 <Link
                   href={item.href}
                   key={item.title}
+                  onClick={handleItemClick}
                   className="h-10 w-10 rounded-full bg-white shadow-sm hover:bg-teal-100 flex items-center justify-center"
                 >
                   <div className="h-4 w-4">{item.icon}</div>
@@ -80,13 +86,13 @@ const FloatingDockMobile = ({
         )}
       </AnimatePresence>
       <button
-        aria-label="button"
+        aria-label="Toggle menu"
         onClick={() => setOpen(!open)}
-        className="h-10 w-10 rounded-full bg-white shadow-sm hover:bg-teal-100 flex items-center justify-center"
+        className="h-12 w-12 rounded-full bg-purple-400 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col items-center justify-center gap-1 border-2 border-indigo-500"
       >
-        <div className="flex flex-col items-center">
-          <IconLayoutNavbarCollapse color="#2563EB" className="h-5 w-5" />
-          <p className="text-xs text-purple-800">Menu</p>
+        <div className="flex flex-col items-center w-10 h-10">
+          <IconLayoutNavbarCollapse className="h-6 w-6 text-white" />
+          <p className="text-xs font-semibold text-white">Menu</p>
         </div>
       </button>
     </div>

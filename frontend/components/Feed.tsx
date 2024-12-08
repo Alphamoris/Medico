@@ -30,38 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/hooks/use-toast';
 import { cn } from "@/lib/utils";
 import Image from 'next/image';
-
-interface Author {
-  id: string;
-  name: string;
-  avatar: string;
-  role: string;
-  verified: boolean;
-}
-
-interface Comment {
-  id: string;
-  author: Author;
-  content: string;
-  timestamp: string;
-  likes: number;
-}
-
-interface Post {
-  id: string;
-  author: Author;
-  content: string;
-  timestamp: string;
-  likes: number;
-  liked: boolean;
-  comments: Comment[];
-  shares: number;
-  tags: string[];
-  readTime: string;
-  trending: boolean;
-  image?: string;
-  completedTime?: string; 
-}
+import { Post } from '@/interface';
 
 const categories = [
   { id: 'nutrition', label: 'Nutrition', icon: '🥗' },
@@ -564,30 +533,3 @@ const HealthFeed: React.FC = () => {
 
 export default HealthFeed;
 
-// # SQL Insert Statements
-// authors_insert = """
-// INSERT INTO authors (id, name, avatar, role, verified) VALUES 
-// ('dr_sarah', 'Dr. Sarah Johnson', '/logo.ico', 'Nutritionist', true),
-// ('coach_mike', 'Coach Mike', '/logo.ico', 'Fitness Expert', true),
-// ('dr_emily', 'Dr. Emily Chen', '/default-avatar.png', 'Sports Medicine', true),
-// ('health_guru', 'Dr. David Lee', '/logo.ico', 'Wellness Expert', true),
-// ('fitness_pro', 'Jessica Smith', '/logo.ico', 'Personal Trainer', true);
-// """
-
-// posts_insert = """
-// INSERT INTO posts (id, author_id, content, timestamp, likes, liked, shares, tags, read_time, trending, image, completed_time) VALUES
-// ('post_1', 'dr_sarah', 'New research suggests that incorporating Mediterranean diet principles can significantly improve heart health and cognitive function. Here are the key takeaways from the latest study...', '2024-02-10 14:00:00', 245, false, 18, 'Nutrition,Research,Heart Health', '3 min read', true, '/logo.ico', '2024-02-10 15:00:00'),
-// ('post_2', 'coach_mike', 'Stop focusing on lengthy cardio sessions! High-Intensity Interval Training (HIIT) can give you better results in less time. Here''s a 20-minute workout that burns more calories than an hour of jogging...', '2024-02-10 12:00:00', 189, false, 24, 'Fitness,HIIT,Workout', '4 min read', true, '/logo.ico', '2024-02-10 13:00:00'),
-// ('post_3', 'dr_emily', 'The importance of proper warm-up routines: Preventing injuries and maximizing workout effectiveness. Here''s a comprehensive guide...', '2024-02-10 10:00:00', 167, false, 15, 'Sports Medicine,Fitness,Health', '5 min read', true, '/logo.ico', '2024-02-10 11:00:00'),
-// ('post_4', 'health_guru', 'Mindful eating practices for better digestion and weight management. Learn how to transform your relationship with food...', '2024-02-10 08:00:00', 156, false, 22, 'Nutrition,Wellness,Mindfulness', '4 min read', false, '/logo.ico', '2024-02-10 09:00:00'),
-// ('post_5', 'fitness_pro', 'Building lean muscle: A science-based approach to strength training. Discover the optimal rep ranges and recovery techniques...', '2024-02-10 06:00:00', 178, false, 20, 'Strength Training,Fitness,Science', '6 min read', true, '/logo.ico', '2024-02-10 07:00:00');
-// """
-
-// comments_insert = """
-// INSERT INTO comments (id, author_id, content, timestamp, likes, post_id) VALUES
-// ('comment_1', 'fitness_pro', 'This HIIT workout looks intense but effective! I''ll definitely try it with my clients.', '2024-02-10 13:00:00', 15, 'post_2'),
-// ('comment_2', 'dr_emily', 'Important reminder to warm up properly before attempting any HIIT workout to prevent injury.', '2024-02-10 13:30:00', 25, 'post_2'),
-// ('comment_3', 'health_guru', 'Great insights on Mediterranean diet! The research is very promising.', '2024-02-10 14:30:00', 20, 'post_1'),
-// ('comment_4', 'coach_mike', 'Excellent points about strength training. I''ve seen similar results with my clients.', '2024-02-10 07:00:00', 18, 'post_5'),
-// ('comment_5', 'dr_sarah', 'The connection between mindful eating and digestion is fascinating. Great article!', '2024-02-10 09:30:00', 22, 'post_4');
-// """
