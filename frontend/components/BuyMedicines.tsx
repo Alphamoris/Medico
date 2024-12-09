@@ -15,25 +15,18 @@ import {
   MinusCircle,
   FileText,
   Search,
-  Filter,
   Tag,
   AlertCircle,
   Package,
   Heart,
-  Clock,
-  DollarSign,
-  ChevronDown,
   Star,
-  ChevronUp,
   X,
   Calendar,
   Factory,
   Pill,
-  Grid,
-  Baby
+  Grid
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
 import { getMedicines } from '@/apilib/ApiGet';
 
 import { Medicine, CartItem, Category } from '@/interface';
@@ -205,7 +198,9 @@ const BuyMedicine: React.FC = () => {
   const scrollToCart = () => {
     cartRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+  console.log(isLoading,error)
 
+  
   return (
     <ToastProvider>
       <div className="min-h-screen bg-indigo-100">

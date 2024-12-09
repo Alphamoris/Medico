@@ -559,7 +559,7 @@ const ProfileComponent: React.FC = () => {
               <div className="mb-8 text-center  mt-20 sm:mt-0">
                 <div className="relative mx-auto w-32 h-32 mb-4 group">
                   <Avatar className="w-32 h-32 border-4 border-teal-100">
-                    <AvatarImage src="/avatar-placeholder.png" alt={`${profileInfo.basic.firstName} ${profileInfo.basic.lastName}`} />
+                    <AvatarImage src="logo.ico" alt={`${profileInfo.basic.firstName} ${profileInfo.basic.lastName}`} />
                     <AvatarFallback className="text-2xl bg-teal-100 text-teal-700">
                       {profileInfo.basic.firstName[0]}{profileInfo.basic.lastName[0]}
                     </AvatarFallback>

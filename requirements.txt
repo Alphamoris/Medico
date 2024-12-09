@@ -1,0 +1,8 @@
+sqlalchemy
+pydantic_settings
+passlib
+bcrypt
+alembic
+PyJWT
+requests
+python-dotenv

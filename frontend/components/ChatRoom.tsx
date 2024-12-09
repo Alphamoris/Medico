@@ -289,6 +289,7 @@ const ChatRoom: React.FC = () => {
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-semibold text-lg text-gray-800">{room.name}</h3>
                   <button
+                    title="button"
                     onClick={() => handleDiscardRoom(room.id)}
                     className="text-gray-400 hover:text-red-500"
                   >
@@ -335,10 +336,10 @@ const ChatRoom: React.FC = () => {
                     <Users className="w-4 h-4" />
                     Join
                   </button>
-                  <button className="flex items-center justify-center gap-2 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 text-sm">
+                  <button title="button" className="flex items-center justify-center gap-2 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 text-sm">
                     <Share2 className="w-4 h-4" />
                   </button>
-                  <button className="flex items-center justify-center gap-2 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 text-sm">
+                  <button title="button" className="flex items-center justify-center gap-2 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 text-sm">
                     <Settings className="w-4 h-4" />
                   </button>
                 </div>
@@ -389,7 +390,8 @@ const ChatRoom: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">Max Participants</label>
-                  <input
+                  <input 
+                    title="button"
                     type="number"
                     value={maxParticipants}
                     onChange={(e) => setMaxParticipants(parseInt(e.target.value))}

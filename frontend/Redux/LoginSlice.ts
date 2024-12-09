@@ -1,13 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const getInitialLoginState = (): boolean => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (isLoggedIn === "true") {
-        return true;
-    } else {
-        localStorage.setItem("isLoggedIn", "false");
-        return false;
+    if (typeof window !== 'undefined') {
+        const isLoggedIn = localStorage.getItem("isLoggedIn");
+        if (isLoggedIn === "true") {
+            return true;
+        } else {
+            localStorage.setItem("isLoggedIn", "false");
+            return false;
+        }
     }
+    return false;  // Default state for server-side rendering
 }
 
 const LoginSlice = createSlice({

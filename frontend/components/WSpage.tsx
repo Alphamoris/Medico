@@ -235,7 +235,7 @@ const VideoConference: React.FC = () => {
         };
 
         wsRef.current.onerror = (error) => {
-          console.error('WebSocket error:', error);
+          console.log('WebSocket error:', error);
           setIsConnectionEstablished(false);
         };
 

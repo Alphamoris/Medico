@@ -1,13 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const getInitialJWTToken = (): string => {
-    const token = localStorage.getItem("token");
-    if (token) {
-        return token;
-    } else {
-        localStorage.setItem("token", "");
-        return "";
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem("token");
+        if (token) {
+            return token;
+        } else {
+            localStorage.setItem("token", "");
+            return "";
+        }
     }
+    return "";  // Default empty token for server-side rendering
 }
 
 const JWTSlice = createSlice({

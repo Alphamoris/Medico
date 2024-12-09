@@ -11,6 +11,7 @@ import { Input } from './ui/input';
 import { postFeedback } from '@/apilib/ApiPost';
 import { AnimatedCounterProps, TestimonialProps, FeatureProps } from '@/interface';
 import { useRouter } from 'next/navigation';
+
 // Optimized Animated Counter with RAF
 const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ end, duration = 3, prefix = '', suffix = '' }) => {
   const [count, setCount] = useState(0);
@@ -35,6 +36,28 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ end, duration = 3, pr
 // Enhanced Floating Icons with Performance Optimization
 const FloatingIcons: React.FC = () => {
   const icons = [HeartPulse, Users, FaUserNurse, BiPlusMedical, Brain, Shield, Activity, Stethoscope];
+  const [dimensions, setDimensions] = useState({ width: 1000, height: 800 });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+    setMounted(true);
+
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -43,23 +66,22 @@ const FloatingIcons: React.FC = () => {
           key={index}
           className="absolute"
           initial={{
-            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-            y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
+            x: Math.random() * dimensions.width,
+            y: Math.random() * dimensions.height,
             opacity: 0
           }}
           animate={{
-            x: [null, Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000)],
-            y: [null, Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800)],
-            opacity: [0.8, 0.8, 0.8],
-            scale: [1, 1.2, 1]
+            x: [null, Math.random() * dimensions.width],
+            y: [null, Math.random() * dimensions.height],
+            opacity: [0, 1, 0]
           }}
           transition={{
-            duration: 10 + Math.random() * 10,
+            duration: 10 + Math.random() * 5,
             repeat: Infinity,
-            repeatType: "reverse"
+            ease: "linear"
           }}
         >
-          <Icon className="w-12 h-12 text-teal-600/20" />
+          <Icon className="w-12 h-12 text-teal-500 opacity-60" />
         </motion.div>
       ))}
     </div>
@@ -495,8 +517,6 @@ const HealthcareLanding: React.FC = () => {
         </div>
       </section>
 
-
-
       {/* {NewsletterSection} */}
       <div className="w-full max-w-4xl mx-auto mb-10 bg-transparent rounded-2xl p-8 shadow-xl transform hover:-translate-y-1 transition-all duration-300">
         <div className="text-center mb-6">
@@ -515,7 +535,6 @@ const HealthcareLanding: React.FC = () => {
           </Button>
         </div>
       </div>
-
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">

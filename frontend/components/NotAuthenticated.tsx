@@ -34,7 +34,7 @@ const FeatureCard = memo(({ icon, text }: { icon: React.ReactNode; text: string 
 
 FeatureCard.displayName = 'FeatureCard';
 
-// Memoized button component with optimized rendering
+// Memoized button component
 const AuthButton = memo(({ icon, label, variant = 'primary', onClick }: {
   icon: React.ReactNode;
   label: string;
@@ -58,6 +58,26 @@ const AuthButton = memo(({ icon, label, variant = 'primary', onClick }: {
 
 AuthButton.displayName = 'AuthButton';
 
+// Separate Image Component
+const SecurityImage = memo(() => (
+  <motion.div 
+    initial={{ opacity: 0, x: 20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: 0.2 }}
+    className="relative"
+  >
+    <Image
+      src="/notauthenticated.png"
+      alt="Security Illustration"
+      width={500}
+      height={500}
+      className="rounded-2xl shadow-2xl"
+      priority
+    />
+  </motion.div>
+));
+
+SecurityImage.displayName = 'SecurityImage';
 
 const NotAuthenticated = () => {
   const [loading, setLoading] = useState(false);
@@ -79,7 +99,7 @@ const NotAuthenticated = () => {
   }, [router]);
 
   return (
-    <div className="w-full h-screen overflow-auto flex flex-col items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-teal-100">
       <div className="container mx-auto px-4 py-8 w-full max-w-7xl flex flex-col lg:flex-row items-center justify-center min-h-screen">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -88,7 +108,6 @@ const NotAuthenticated = () => {
           className="w-full lg:w-1/2 flex flex-col items-center justify-center space-y-8"
         >
           <Card className="p-6 lg:p-8 space-y-6 bg-white/80 backdrop-blur-sm border-teal-100 shadow-xl relative">
-            {/* Website Logo and Name */}
             <div className="absolute sm:top-20 top-16 right-4 flex items-center gap-2">
               <Image 
                 src="/logo.ico"
@@ -105,8 +124,8 @@ const NotAuthenticated = () => {
               transition={{ duration: 0.5 }}
             >
               <div className="h-16 lg:h-20 w-16 lg:w-20 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center">
-  <LockKeyhole className="h-8 lg:h-10 w-8 lg:w-10 text-white" />
-</div>
+                <LockKeyhole className="h-8 lg:h-10 w-8 lg:w-10 text-white" />
+              </div>
             </motion.div>
 
             <div className="space-y-3">
@@ -141,28 +160,11 @@ const NotAuthenticated = () => {
           </Card>
         </motion.div>
 
-        {/* Right side - Enhanced decorative image */}
-        <Suspense fallback={<Loader />}>
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="hidden lg:flex flex-col items-center justify-center ms-10 space-y-8"
-          >
-            <div className="relative">
-              <Image
-                src="/notauthenticated.png"
-                alt="Security Illustration"
-                width={500}
-                height={500}
-                className="rounded-2xl shadow-2xl"
-                priority
-              />
-              <div className="absolute -bottom-4 -right-4 h-32 w-32 bg-teal-500/10 rounded-full animate-pulse delay-150" />
-              <div className="absolute -top-4 -left-4 h-24 w-24 bg-teal-600/10 rounded-full animate-pulse" />
-            </div>
-          </motion.div>
-        </Suspense>
+        <div className="hidden lg:flex flex-col items-center justify-center ms-10 space-y-8">
+          <Suspense fallback={<Loader />}>
+            <SecurityImage />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

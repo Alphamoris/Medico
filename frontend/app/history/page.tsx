@@ -1,4 +1,3 @@
-import MedicoContactPage from "@/components/ContactUs";
 import MedicoHistoryDashboard from "@/components/History";
 import Loader from "@/components/Loader";
 import NoAuthDisplay from "@/components/NoAuthDisplay";

@@ -1,6 +1,5 @@
 "use client"
 import React, { ReactNode, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { selectIsLoggedIn } from '@/Redux/LoginSlice';
 import { useSelector } from 'react-redux';
 import NotAuthenticated from './NotAuthenticated';

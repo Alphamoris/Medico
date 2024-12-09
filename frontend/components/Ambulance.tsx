@@ -20,14 +20,10 @@ const EMERGENCY_QUOTES = [
   "We're available 24/7, because emergencies don't wait."
 ];
 
-const EMERGENCY_TYPES = [
-  { value: 'medical', label: 'Medical Emergency' },
-  { value: 'accident', label: 'Accident' },
-  { value: 'other', label: 'Other Emergency' }
-];
 
-// Mock API call with better typing
+
 const sendEmergencyRequest = async (data: FormData): Promise<EmergencyResponse> => {
+  console.log(data)
   await new Promise(resolve => setTimeout(resolve, 1500));
   return {
     success: true,

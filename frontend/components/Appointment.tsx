@@ -175,7 +175,7 @@ const AppointmentComponent: React.FC = () => {
               <select
                 title="Filter by status"
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as any)}
+                onChange={(e) => setFilterStatus(e.target.value as "all" | "upcoming" | "completed" | "cancelled" )}
                 className="px-4 py-2 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
               >
                 <option value="all">All Status</option>
