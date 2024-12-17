@@ -1,5 +1,6 @@
 # Backend specific ignores
 backend/virenv/        # Virtual environment directory
+
 backend/.env          # Environment variables file
 backend/alembic.ini   # Alembic configuration file
 
