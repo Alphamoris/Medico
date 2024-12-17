@@ -2,6 +2,7 @@
 backend/virenv/        # Virtual environment directory
 
 backend/.env          # Environment variables file
+
 backend/alembic.ini   # Alembic configuration file
 
 # Python specific ignores
