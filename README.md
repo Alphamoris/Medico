@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Medico Logo](frontend/public/logo.png)
+<img src="frontend/public/logo.ico" alt="Medico Logo" width="50" height="50">
 
 *Revolutionizing Healthcare Management with Modern Technology*
 
@@ -42,6 +42,180 @@ Medico is a comprehensive healthcare platform that bridges the gap between patie
 - **Real-time Ambulance Tracking**: GPS-enabled ambulance tracking
 - **Quick Response System**: Automated dispatch system for emergencies
 - **Emergency Contact Management**: Easy access to emergency contacts
+
+## 📱 User Applications
+
+```mermaid
+graph TD
+    A[Web Application] --> D[API Gateway]
+    B[Mobile App] --> D
+    C[Doctor's Portal] --> D
+    D --> E[Backend Services]
+    
+    style A fill:#74b9ff
+    style B fill:#74b9ff
+    style C fill:#74b9ff
+    style D fill:#74b9ff
+    style E fill:#74b9ff
+```
+
+## 🏗️ High-Level Architecture
+
+```mermaid
+graph TB
+    subgraph "Frontend"
+        A1[Next.js Web App]
+        A2[Mobile Apps]
+    end
+
+    subgraph "Backend Services"
+        B1[Patient Service]
+        B2[Doctor Service]
+        B3[Appointment Service]
+        B4[Emergency Service]
+    end
+
+    subgraph "Data Storage"
+        C1[PostgreSQL]
+        C2[Redis Cache]
+        C3[File Storage]
+    end
+
+    A1 & A2 --> B1 & B2 & B3 & B4
+    B1 & B2 & B3 & B4 --> C1 & C2 & C3
+
+    style A1 fill:#74b9ff
+    style A2 fill:#74b9ff
+    style B1 fill:#74b9ff
+    style B2 fill:#74b9ff
+    style B3 fill:#74b9ff
+    style B4 fill:#74b9ff
+    style C1 fill:#74b9ff
+    style C2 fill:#74b9ff
+    style C3 fill:#74b9ff
+```
+
+## 🔄 Appointment Flow
+
+```mermaid
+sequenceDiagram
+    Patient->>+Web App: Book Appointment
+    Web App->>+Backend: Check Availability
+    Backend->>+Database: Query Slots
+    Database-->>-Backend: Available Slots
+    Backend-->>-Web App: Show Options
+    Web App-->>-Patient: Display Slots
+    Patient->>+Web App: Confirm Booking
+    Web App->>+Backend: Create Appointment
+    Backend->>+Database: Save Booking
+    Database-->>-Backend: Confirmed
+    Backend-->>-Web App: Success
+    Web App-->>-Patient: Confirmation
+```
+
+## 💻 Technical Components
+
+### Frontend Architecture
+```mermaid
+graph TD
+    A[Next.js App] --> B[Pages & Components]
+    B --> C[State Management]
+    B --> D[API Integration]
+    
+    subgraph "UI Layer"
+        B --> E[Radix UI Components]
+        B --> F[Tailwind Styling]
+    end
+    
+    subgraph "Data Layer"
+        C --> G[Redux Store]
+        C --> H[React Query]
+    end
+
+    style A fill:#74b9ff
+    style B fill:#74b9ff
+    style C fill:#74b9ff
+    style D fill:#74b9ff
+    style E fill:#74b9ff
+    style F fill:#74b9ff
+    style G fill:#74b9ff
+    style H fill:#74b9ff
+```
+
+### Backend Services
+```mermaid
+graph TD
+    A[FastAPI] --> B[Authentication]
+    A --> C[Core Services]
+    A --> D[Data Access]
+    
+    subgraph "Service Layer"
+        C --> E[Patient Management]
+        C --> F[Appointment System]
+        C --> G[Emergency Services]
+    end
+    
+    subgraph "Storage Layer"
+        D --> H[PostgreSQL]
+        D --> I[Redis Cache]
+        D --> J[S3 Storage]
+    end
+
+    style A fill:#74b9ff
+    style B fill:#74b9ff
+    style C fill:#74b9ff
+    style D fill:#74b9ff
+    style E fill:#74b9ff
+    style F fill:#74b9ff
+    style G fill:#74b9ff
+    style H fill:#74b9ff
+    style I fill:#74b9ff
+    style J fill:#74b9ff
+```
+
+## 🚀 Quick Start
+
+```bash
+# Clone repository
+git clone https://github.com/medico/platform
+
+# Start with Docker
+docker-compose up
+
+# Access applications
+Web: http://localhost:3000
+API: http://localhost:8000
+```
+
+
+
+
+## 🔒 Security Features
+```mermaid
+graph TD
+    A[Security Layer] --> B[Authentication]
+    A --> C[Authorization]
+    A --> D[Data Protection]
+    
+    B --> E[JWT Tokens]
+    B --> F[OAuth2]
+    
+    C --> G[Role-Based Access]
+    
+    D --> H[Encryption]
+    D --> I[HIPAA Compliance]
+
+    style A fill:#74b9ff
+    style B fill:#74b9ff
+    style C fill:#74b9ff
+    style D fill:#74b9ff
+    style E fill:#74b9ff
+    style F fill:#74b9ff
+    style G fill:#74b9ff
+    style H fill:#74b9ff
+    style I fill:#74b9ff
+```
+
 
 ## 🛠️ Technical Architecture
 
@@ -214,7 +388,7 @@ Medico/
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions!
 
 1. Fork the repository
 2. Create your feature branch
@@ -222,17 +396,14 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 4. Write/update tests as needed
 5. Submit a pull request
 
-## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- All our contributors and supporters
 - Open source libraries we depend on
 - Medical professionals who provided domain expertise
 
 ## 📞 Support
 
-For support, email support@medico.com or join our [Discord community](https://discord.gg/medico).
+For support, email alphamoris45@gmail.com.
 
