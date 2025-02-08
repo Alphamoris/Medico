@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+
 const getInitialJWTToken = (): string => {
     if (typeof window !== 'undefined') {
         const token = localStorage.getItem("token");
