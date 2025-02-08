@@ -27,5 +27,6 @@ const LoginSlice = createSlice({
 });
 
 export const { setIsLoggedIn } = LoginSlice.actions;
+
 export const selectIsLoggedIn = (state: any) => state.login.isLoggedIn; // Added selector for accessing isLoggedIn
 export default LoginSlice.reducer;
