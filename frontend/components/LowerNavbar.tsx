@@ -64,6 +64,9 @@ export function LowerNavbar() {
       href: "/profile",
     },
   ];
+
+
+
   return (
     <div className="fixed bottom-1 left-1/2 -translate-x-1/2 z-40 ">
       <FloatingDock 
