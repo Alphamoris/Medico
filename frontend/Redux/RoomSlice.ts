@@ -16,6 +16,7 @@ const roomSlice = createSlice({
     },
 });
 
+
 export const { setRooms } = roomSlice.actions;
 export const selectRooms = (state: any) => state.room.rooms;
 export default roomSlice.reducer;
